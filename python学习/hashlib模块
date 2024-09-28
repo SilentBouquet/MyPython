@@ -1,0 +1,57 @@
+# MD5是一种不可逆的加密算法，它可靠且安全
+# 在python中引入hashlib的模块就可以搞定MD5的加密工作
+import hashlib
+
+# 创建MD5对象
+obj = hashlib.md5()
+# 把要加密的信息传递给obj
+obj.update("123456".encode('utf-8'))
+# 从obj中拿到密文
+mi = obj.hexdigest()
+print(mi)
+
+# 正常的默认加密过程是容易撞库的
+# 解决撞库的办法是：加盐
+obj = hashlib.md5(b'akuiwdhiuawhd')
+obj.update("123456".encode('utf-8'))
+print(obj.hexdigest())
+
+
+def func(solt, s):
+    obj = hashlib.md5(solt.encode('utf-8'))
+    obj.update(s.encode('utf-8'))
+    return obj.hexdigest()
+
+
+# 注册
+username = input('请输入用户名：')
+password = input('请输入密码：')
+mi_password = func(username, password)
+f = open('../操作文件/user.txt', mode="w", encoding='utf-8')
+f.write(username + '\n' + mi_password)
+f.close()
+
+# 登录
+username = input('请输入用户名：')
+password = input('请输入密码：')
+mi_password = func(username, password)
+f = open('../操作文件/user.txt', mode="r", encoding='utf-8')
+name = f.readline().strip()
+word = f.readline().strip()
+f.close()
+if username == name and mi_password == word:
+    print("登录成功")
+else:
+    print("登陆失败")
+
+'''
+文件也可以进行MD5的加密操作
+obj = hashlib.md5(b'abcdefg')
+f = open('wf.txt', mode='rb')
+for line in f:
+    obj.update(line.encode('utf-8'))
+print(obj.hexdigest())
+可以判断文件的一致性
+在我们上传文件的时候，首先计算你要上传文件的MD5，然后去数据库里搜索有没有相同的值
+如果有，说明已经上传过，已经保存起来了
+'''

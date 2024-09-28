@@ -10,6 +10,6 @@ with open('../操作文件/拉美文学.txt', mode='a', encoding='utf-8') as e:
     e.write('鲁尔福')
     e.close()
 
-with open('头像.jpeg', mode='rb') as d:
+with open('../操作文件/女孩.png', mode='rb') as d:
     for line in d:
         print(line)

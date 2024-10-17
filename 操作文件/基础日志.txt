@@ -1,0 +1,5 @@
+2024-10-07  21:49:26 - root - CRITICAL - logging模块：今天系统炸了，请程序员来测试
+2024-10-07  21:49:26 - root - ERROR - logging模块：一般指的是普通的程序错误，俗称bug
+2024-10-07  21:49:26 - root - WARNING - logging模块：我只是一个警告信息
+2024-10-07  21:49:26 - root - INFO - logging模块：我只是一个普通的消息
+2024-10-07  21:49:26 - root - DEBUG - logging模块：默认最低等级的消息

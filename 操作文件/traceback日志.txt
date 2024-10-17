@@ -1,0 +1,6 @@
+2024-10-07  23:03:03 - root - ERROR - traceback模块：Traceback (most recent call last):
+  File "D:\pycharm\python项目\python学习\traceback模块.py", line 14, in <module>
+    print(1/0)
+          ~^~
+ZeroDivisionError: division by zero
+

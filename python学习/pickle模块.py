@@ -9,10 +9,10 @@ print(lst2)
 
 '''
 dic = {"name": "admin", "password": 123456}
-f = open("data.txt", mode="w", encoding="utf-8")
+f = open("数据分析实训.txt", mode="w", encoding="utf-8")
 f.write(str(dic))
 
-f = open("data.txt", mode="r", encoding="utf-8")
+f = open("数据分析实训.txt", mode="r", encoding="utf-8")
 s = f.read()
 print(s, type(s))
 d = eval(s)         # eval对安全性有影响
@@ -22,10 +22,10 @@ f.close()
 
 # 存储数据到文件最合理的方案就是用pickle
 dic = {"name": "admin", "password": 123456}
-pickle.dump(dic, open("data.txt", mode="wb"))
+pickle.dump(dic, open("数据分析实训.txt", mode="wb"))
 
 # 读取序列化之后的文件
-dic = pickle.load(open("data.txt", mode="rb"))
+dic = pickle.load(open("数据分析实训.txt", mode="rb"))
 print(dic)
 
 '''

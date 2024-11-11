@@ -17,14 +17,11 @@ def plot_sigmoid():
     # 绘制垂直线，标记出y轴
     plt.axvline(0.0, color='k')
     plt.ylim(-0.1, 1.1)
-    plt.xlabel('$z$')
-    plt.ylabel('$sigma(z)$')
+    plt.xlabel(r'$z$')
+    plt.ylabel(r'$sigma(z)$')
+    plt.title(r'$logistic\ sigmoid$')
     # 设置ytick的间隔
     plt.yticks([0.0, 0.5, 1.0])
-    plt.rcParams['font.sans-serif'] = ['KaiTi']
-    plt.rcParams['axes.unicode_minus'] = False
-    plt.rcParams['mathtext.fontset'] = 'cm'
-    plt.title(r'$logistic\ sigmoid$函数图')
     # 获取当前所有坐标轴对象
     ax = plt.gca()
     # 显示水平网格线
@@ -45,16 +42,13 @@ def plot_loss_function():
     z = np.arange(-10, 10, 0.1)
     sigma_z = sigmoid(z)
     c1 = [loss_1(x) for x in z]
-    plt.plot(sigma_z, c1, label='L(w, b) if y=1')
+    plt.plot(sigma_z, c1, label=r'$L(w,\ b)\ if\ y=1$')
     c0 = [loss_0(x) for x in z]
-    plt.plot(sigma_z, c0, linestyle='--', label='L(w, b) if y=0')
-    plt.ylim(0.0, 5.1)
-    plt.xlim(0, 1)
+    plt.plot(sigma_z, c0, linestyle='--', label=r'$L(w,\ b)\ if\ y=0$')
     plt.xlabel(r'$sigma(z)$')
     plt.ylabel(r'$L(w,\ b)$')
-    plt.rcParams['font.sans-serif'] = ['KaiTi']
-    plt.rcParams['axes.unicode_minus'] = False
-    plt.rcParams['mathtext.fontset'] = 'cm'
+    plt.ylim(0.0, 5.1)
+    plt.xlim(0, 1)
     plt.title('逻辑回归损失函数图')
     plt.legend(loc='upper center')
     plt.tight_layout()
@@ -99,6 +93,9 @@ class LogisticRegressionGD:
 
 
 if __name__ == '__main__':
+    plt.rcParams['font.sans-serif'] = ['KaiTi']
+    plt.rcParams['axes.unicode_minus'] = False
+    plt.rcParams['mathtext.fontset'] = 'cm'
     plot_sigmoid()
     plot_loss_function()
 
@@ -121,12 +118,9 @@ if __name__ == '__main__':
     Irgd = LogisticRegressionGD(eta=0.3, n_iter=1000, random_state=1)
     Irgd.fit(X_train_01_subset, y_train_01_subset)
     plot_decision_regions(X_train_01_subset, y_train_01_subset, clf=Irgd)
-    plt.xlabel(r'$\ Petal\ length\ [standardized]$')
-    plt.ylabel(r'$\ Petal\ width\ [standardized]$')
+    plt.xlabel(r'$Petal\ length\ [standardized]$')
+    plt.ylabel(r'$Petal\ width\ [standardized]$')
     plt.legend(loc='upper left')
-    plt.rcParams['font.sans-serif'] = ['KaiTi']
-    plt.rcParams['axes.unicode_minus'] = False
-    plt.rcParams['mathtext.fontset'] = 'cm'
     plt.title('逻辑回归模型的决策区域')
     plt.tight_layout()
     plt.show()

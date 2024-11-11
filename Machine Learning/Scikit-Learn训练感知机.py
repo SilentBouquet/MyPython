@@ -27,7 +27,7 @@ def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
         plt.scatter(x=X[y == cl, 0], y=X[y == cl, 1],
                     alpha=0.8, c=colors[idx],
                     marker=markers[idx],
-                    label=f"Class {cl}",
+                    label=rf"$Class\ {cl}$",
                     edgecolors='black')
 
     # 标记出测试数据
@@ -65,10 +65,13 @@ if __name__ == '__main__':
     X_combined_std = np.vstack((X_test_std, X_train_std))
     # 在水平方向上平铺
     y_combined = np.hstack((y_train, y_test))
+    plt.rcParams['font.sans-serif'] = ['KaiTi']
+    plt.rcParams['axes.unicode_minus'] = False
+    plt.rcParams['mathtext.fontset'] = 'cm'
     plot_decision_regions(X_combined_std, y_combined,
                           classifier=ppn, test_idx=range(105, 150))
-    plt.xlabel('Petal length [standardized]')
-    plt.ylabel('Petal width [standardized]')
+    plt.xlabel(r'$Petal\ length\ [standardized]$')
+    plt.ylabel(r'$Petal\ width\ [standardized]$')
     plt.legend(loc='upper left')
     plt.tight_layout()
     plt.show()

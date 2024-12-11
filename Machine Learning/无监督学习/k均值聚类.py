@@ -3,7 +3,6 @@ import numpy as np
 from sklearn import datasets
 from sklearn.cluster import KMeans
 from matplotlib import pyplot as plt
-from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
 from mlxtend.plotting import plot_decision_regions
 

@@ -3,16 +3,11 @@ import hashlib
 import redis
 import json
 
+Redis_Pool = redis.ConnectionPool(host='192.168.233.128', port=6379, encoding='utf-8', max_connections=100)
+
 
 def get_data():
-    Redis_Connection = {
-        "host": '192.168.233.128',
-        "port": 6379,
-        "encoding": 'utf-8',
-        "password": None,
-        "db": 0
-    }
-    conn = redis.Redis(**Redis_Connection)
+    conn = redis.Redis(connection_pool=Redis_Pool)
     data = conn.brpop(["spider_task_list"], timeout=5)
     if not data:
         return None
@@ -20,14 +15,7 @@ def get_data():
 
 
 def set_result(tid, value):
-    Redis_Connection = {
-        "host": '192.168.233.128',
-        "port": 6379,
-        "encoding": 'utf-8',
-        "password": None,
-        "db": 0
-    }
-    conn = redis.Redis(**Redis_Connection)
+    conn = redis.Redis(connection_pool=Redis_Pool)
     conn.hset("spider_result_dict", tid, value)
 
 

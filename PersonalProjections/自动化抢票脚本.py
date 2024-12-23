@@ -1,10 +1,9 @@
-import sys
+import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import schedule
-import time
+
 URL = "https://kyfw.12306.cn/otn/resources/login.html"
 
 

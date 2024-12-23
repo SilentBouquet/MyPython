@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单详情</title>
+    <style>
+body {
+    background-color: #f4f4f4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+thead tr {
+    background-color: #33475b;
+    color: white;
+}
+
+tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.numeric {
+    text-align: center;
+}
+
+
+        .profile-menu li {
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .profile-menu li:last-child {
+            border-bottom: none;
+        }
+
+        .profile-menu a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .profile-menu a:hover {
+            text-decoration: underline;
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropbtn {
+            background-color: #33475b;
+            color: white;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        .navbar {
+    background-color: #33475b;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    margin-right: auto; /* 将logo推到左边 */
+    font-size: 20px;
+}
+
+.nav-item {
+    color: white;
+    text-decoration: none;
+    margin-right: 20px;
+    font-size: 16px; /* 统一的字体大小 */
+}
+
+        .dropdown-content a:hover {background-color: #f1f1f1}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+            <span class="logo">OP订单平台</span>
+            <a href="#" class="nav-item">首页</a>
+            <a href="/order/list" class="nav-item">我的订单</a>
+            <a href="#" class="nav-item">咨询</a>
+            <a href="/order/create" class="nav-item">现在下单</a>
+<div class="dropdown">
+    <button class="dropbtn">{{ user.real_name }}</button>
+</div>
+    </nav>
+    <h1 style="text-align: center;">订单详情</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>订单号</th>
+                <th>下单地址</th>
+                <th>数量</th>
+                <th>订单状态</th>
+                <th>用户名</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in data_list %}
+            <tr class="{% if loop.index % 2 == 1 %}tr-even{% else %}tr-odd{% endif %}">
+                <td>{{ order.id }}</td>
+                <td><a href="{{ order.url }}" target="_blank">{{ order.url }}</a></td>
+                <td class="numeric">{{ order.count }}</td>
+                <td>{{ order.status }}</td>
+                <td class="numeric">{{ order.real_name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Page</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #e6f7ff; /* 浅蓝色背景 */
+    color: #333;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .title {
+    font-family: 'Pacifico', cursive; /* 使用花体字体 */
+    font-size: 48px; /* 增加字体大小 */
+    color: #ffffff; /* 字体颜色为白色 */
+    text-align: center;
+    background-color: #4b7bec; /* 标题背景颜色 */
+    padding: 10px 20px; /* 标题内边距 */
+    border-radius: 10px; /* 标题边框圆角 */
+    width: 100%;
+    max-width: 500px; /* 限制标题的最大宽度 */
+      margin: 10px auto 40px; /* 居中并设置顶部和底部外边距 */
+  }
+  .login-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h2 {
+    text-align: center;
+    color: #4b7bec;
+    margin-bottom: 20px;
+  }
+  .form-group {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  input[type="text"],
+  input[type="password"],
+  select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 5px;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  button {
+    background-color: #4b7bec;
+    color: white;
+    padding: 14px 20px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+  }
+  button:hover {
+    opacity: 0.8;
+  }
+  .forgot-password {
+    color: #4b7bec;
+    margin-top: 5px;
+    text-align: center;
+  }
+
+  .social-login button {
+    background-color: transparent;
+    color: #4b7bec;
+    border: 1px solid #4b7bec;
+    padding: 10px 15px;
+    margin: 0 5px;
+    width: auto;
+  }
+  .social-login button:hover {
+    background-color: #e6f7ff;
+  }
+</style>
+</head>
+<body>
+
+<div class="title">订单平台</div>
+
+<div class="login-container">
+  <h2>Login</h2>
+  <form action="/login32" method="post">
+    <div class="form-group">
+      <label for="userType"><b>Login Type</b></label>
+      <select id="userType" name="userType" class="form-control">
+        <option value="1" selected>Customer</option>
+        <option value="2">Admin</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="phone"><b>Phone Number</b></label>
+        <label>
+            <input type="text" placeholder="Enter Phone Number" name="phone" required>
+        </label>
+    </div>
+    <div class="form-group">
+      <label for="password"><b>Password</b></label>
+        <label>
+            <input type="password" placeholder="Enter Password" name="password" required>
+                  <span style="color: red;">{{ error }}</span>
+        </label>
+    </div>
+    <button type="submit">Login</button>
+    <div class="forgot-password">
+      <a href="#">Forgot Password?</a>
+    </div>
+  </form>
+</div>
+
+</body>
+</html>

@@ -7,13 +7,13 @@ from torch.utils.data import DataLoader, Subset
 from torchvision.transforms import transforms
 
 
-image_path = './'
+image_path = '../'
 transform = transforms.Compose([transforms.ToTensor()])
 
 mnist_dataset = torchvision.datasets.MNIST(root=image_path,
                                            train=True,
                                            transform=transform,
-                                           download=True)
+                                           download=False)
 
 mnist_valid_dataset = Subset(mnist_dataset, torch.arange(10000))
 mnist_train_dataset = Subset(mnist_dataset, torch.arange(10000, len(mnist_dataset)))

@@ -1,5 +1,12 @@
 import pandas as pd
 
+data = {
+    'Name': ['Alice', 'Bob', 'Charlie'],
+    'Age': [25, 30, 35],
+    'Score': [90, 85, 88]
+}
+df = pd.DataFrame(data)
+
 # 数据类型分类
 # 整数类型
 s = pd.Series([1, 2, 3, 4, 5])
@@ -23,3 +30,16 @@ s = s.astype('category')
 print(s.dtype, '\n', s)
 
 # 分类类型
+data = ['A', 'B', 'C', 'A', 'B', 'C']
+s = pd.Series(data)
+cat_series = pd.Categorical(s)
+# 查看分类的唯一值列表
+print('\n', cat_series.categories)
+# 查看每个元素在分类中的位置索引
+print('\n', cat_series.codes)
+# 指定分类变量的顺序
+cat_series = pd.Categorical(s, categories=['A', 'B', 'C'], ordered=True)
+print('\n', cat_series)
+# 使用分类类型数据
+cat_series = cat_series.sort_values()
+print('\n', cat_series)

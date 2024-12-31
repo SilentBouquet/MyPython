@@ -4,7 +4,6 @@ import pytorch_lightning as pl
 from torchmetrics import Accuracy
 from torchvision import transforms
 from torchvision.datasets import MNIST
-from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader, random_split
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
@@ -65,13 +64,13 @@ class MultiLayerPerceptron(pl.LightningModule):
 
 
 class MnistDataModel(pl.LightningDataModule):
-    def __init__(self, data_path="../"):
+    def __init__(self, data_path='../'):
         super().__init__()
         self.data_path = data_path
         self.transform = transforms.Compose([transforms.ToTensor()])
 
     def prepare_data(self):
-        MNIST(self.data_path, train=True, download=False)
+        MNIST(self.data_path, train=True, download=True)
 
     def setup(self, stage=None):
         mnist_all = MNIST(

@@ -2,12 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-URL = 'http://www.netbian.com'
+URL = 'https://www.netbian.com'
 for s in range(1, 5):
     if s == 1:
         url = URL
     else:
-        url = f'http://www.netbian.com/index_{s}.htm'
+        url = f'https://www.netbian.com/index_{s}.htm'
     resp = requests.get(url)
     resp.encoding = 'gbk'
     # print(resp.text)

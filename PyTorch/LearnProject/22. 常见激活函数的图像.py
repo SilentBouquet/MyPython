@@ -1,5 +1,8 @@
+import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
+
+matplotlib.use('TKAgg')
 
 
 # 定义激活函数
@@ -49,6 +52,5 @@ plt.title(r"$Tanh\ Activation\ Function$", fontsize=15)
 plt.xlabel("$x$", fontsize=14)
 plt.ylabel("$F(x)$", fontsize=14)
 plt.grid(True)
-
 plt.tight_layout()
 plt.show()

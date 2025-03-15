@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动作业批改系统</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        #left-widget {
+            width: 40%;
+            background-color: #ffffff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin: 20px;
+        }
+
+        #upload-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 95%;
+            height: 80vh;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #upload-container:hover {
+            border-color: #0056b3;
+            background-color: #e9f5ff;
+        }
+
+        #upload-icon {
+            font-size: 60px;
+            color: #007bff;
+        }
+
+        #upload-label {
+            font-size: 16px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        #preview-image {
+            max-width: 90%;
+            max-height: 40vh;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 8px;
+            display: none;
+        }
+
+        #exchange-button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 95%;
+            margin-top: 20px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        #exchange-button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        #exchange-button:active {
+            background-color: #003366;
+        }
+
+        #right-widget {
+            width: 60%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin: 20px;
+        }
+
+        .upper-right-layout {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .type-container, .answer-widget, .score-widget {
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 100%; /* 使按钮宽度与输入框一致 */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            background-color: #003366;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            outline: none;
+        }
+
+        .result-text {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 42vh;
+            overflow-y: auto;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="left-widget">
+        <div id="upload-container" onclick="uploadPhoto()">
+            <div id="upload-icon">+</div>
+            <div id="upload-label">点击上传图片</div>
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
+        </div>
+        <div id="preview-image">
+            <!-- 动态插入图片 -->
+        </div>
+        <input type="hidden" id="file-path">
+        <button id="exchange-button" onclick="uploadPhoto()">上传图片</button>
+    </div>
+    <div id="right-widget">
+        <div class="upper-right-layout">
+            <div class="type-container">
+                <label for="type-combo">选择题型：</label>
+                <select id="type-combo">
+                    <option value="选择题">选择题</option>
+                    <option value="填空题">填空题</option>
+                    <option value="解答题">解答题</option>
+                    <option value="简答题">简答题</option>
+                    <option value="作文题">作文题</option>
+                </select>
+            </div>
+            <div class="answer-widget">
+                <label for="answer-input">参考答案：</label>
+                <input type="text" id="answer-input" placeholder="请输入参考答案">
+            </div>
+            <div class="score-widget">
+                <label for="score-input">分值：</label>
+                <input type="text" id="score-input" placeholder="请输入题目分值">
+            </div>
+            <button onclick="calculateScore()">计算得分</button>
+        </div>
+        <div class="lower-right-layout">
+            <div class="result-text" id="result-text"></div>
+        </div>
+    </div>
+
+    <script>
+        function uploadPhoto() {
+            document.getElementById('file-input').click();
+        }
+
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(data.error);
+                        } else {
+                            document.getElementById('file-path').value = data.file_path;
+                            // 显示上传的图片
+                            const previewImage = document.getElementById('preview-image');
+                            previewImage.innerHTML = ''; // 清空之前的内容
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                previewImage.innerHTML = `<img src="${event.target.result}" style="max-width: 100%; max-height: 100%; margin: 0 auto; display: block;">`;
+                            };
+                            reader.readAsDataURL(file);
+                            // 隐藏上传容器，显示图片
+                            document.getElementById('upload-container').style.display = 'none';
+                            document.getElementById('preview-image').style.display = 'block';
+                        }
+                    });
+            }
+        });
+
+        function calculateScore() {
+            const questionType = document.getElementById('type-combo').value;
+            const referenceAnswer = document.getElementById('answer-input').value;
+            const totalScore = document.getElementById('score-input').value;
+            const filePath = document.getElementById('file-path').value;
+
+            fetch('/calculate_score', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question_type: questionType,
+                    reference_answer: referenceAnswer,
+                    total_score: totalScore,
+                    file_path: filePath
+                })
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('result-text').innerText = data.error;
+                    } else {
+                        document.getElementById('result-text').innerText = data.result;
+                        // 显示处理后的图片
+                        const previewImage = document.getElementById('preview-image');
+                        previewImage.innerHTML = '<img src="' + data.image_path + '" style="max-width: 100%; max-height: 100%; margin: 0 auto; display: block;">';
+                        previewImage.style.display = 'block';
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

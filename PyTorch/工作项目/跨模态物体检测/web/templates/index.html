@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能图片查询系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #1a1a1a;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+            background: #2c2c2c;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .image-box {
+            width: 100%;
+            height: 550px;
+            background: #3a3a3a;
+            border: 3px dashed #646464;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .image-box:hover {
+            border-color: #9b59b6;
+            transform: scale(1.02);
+        }
+
+        .image-box p {
+            color: #646464;
+            font-size: 16px;
+        }
+
+        .upload-button {
+            background: linear-gradient(135deg, #9b59b6 0%, #e74c3c 100%);
+            color: #ffffff;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 100%;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-button:hover {
+            background: linear-gradient(135deg, #e74c3c 0%, #9b59b6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-button:disabled {
+            background: #666666;
+            cursor: not-allowed;
+        }
+
+        .right-panel {
+            flex: 1;
+            background: #2c2c2c;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-box {
+            margin-bottom: 25px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #3a3a3a;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+            background: #4a4a4a;
+            color: #ffffff;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #9b59b6;
+        }
+
+        .search-button {
+            background: linear-gradient(135deg, #9b59b6 0%, #e74c3c 100%);
+            color: #ffffff;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 100%;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-button:hover {
+            background: linear-gradient(135deg, #e74c3c 0%, #9b59b6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-button:disabled {
+            background: #666666;
+            cursor: not-allowed;
+        }
+
+        .result-box {
+            width: 100%;
+            height: 450px;
+            background: #3a3a3a;
+            border: 2px solid #646464;
+            border-radius: 15px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #4a4a4a;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 滚动条样式 */
+        .result-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .result-box::-webkit-scrollbar-track {
+            background: #3a3a3a;
+        }
+
+        .result-box::-webkit-scrollbar-thumb {
+            background: #9b59b6;
+            border-radius: 4px;
+        }
+
+        .result-box::-webkit-scrollbar-thumb:hover {
+            background: #e74c3c;
+        }
+
+        /* 标题样式 */
+        .title {
+            text-align: center;
+            color: #9b59b6;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="title">跨模态文本匹配</div>
+    <div class="container">
+        <div class="left-panel">
+            <div class="image-box" id="imageBox">
+                <p>拖放图片或点击上传</p>
+                <input type="file" id="imageUpload" style="display: none;">
+            </div>
+            <button class="upload-button" onclick="uploadImage()" id="uploadButton">上传图片</button>
+        </div>
+        <div class="right-panel">
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="请输入查询文本">
+                <button class="search-button" onclick="performSearch()" id="searchButton">查询</button>
+            </div>
+            <div class="result-box" id="resultBox">
+                <!-- 查询结果显示 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let searchButtonLocked = false;
+
+        function uploadImage() {
+        document.getElementById('imageUpload').click();
+    }
+
+    document.getElementById('imageUpload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const maxWidth = 600;
+                    const maxHeight = 400;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth || height > maxHeight) {
+                        if (width / height > maxWidth / maxHeight) {
+                            width = maxWidth;
+                            height = Math.floor((img.height * maxWidth) / img.width);
+                        } else {
+                            height = maxHeight;
+                            width = Math.floor((img.width * maxHeight) / img.height);
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    document.getElementById('imageBox').innerHTML = '';
+                    document.getElementById('imageBox').appendChild(canvas);
+
+                    // 上传图片到服务器
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    }).then(response => response.json())
+                      .then(data => {
+                          if (data.message === 'Image uploaded successfully') {
+                              alert('Image uploaded successfully');
+                              uploadedImagePath = data.image_path; // 保存上传的图片路径
+                          }
+                      });
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+        function performSearch() {
+            if (searchButtonLocked) return;
+            searchButtonLocked = true;
+            document.getElementById('searchButton').disabled = true;
+
+            const queryText = document.getElementById('searchInput').value;
+            const imageBox = document.getElementById('imageBox');
+            const canvas = imageBox.querySelector('canvas');
+            if (canvas && queryText && uploadedImagePath) { // 确保有上传的图片路径
+                const imageData = canvas.toDataURL('image/jpeg');
+                fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query_text: queryText,
+                        image_path: uploadedImagePath // 使用保存的图片路径
+                    })
+                }).then(response => response.json())
+                  .then(data => {
+                      if (data.message === 'Search completed') {
+                          const resultBox = document.getElementById('resultBox');
+                          resultBox.innerHTML = '<img src="' + data.result_path + '" style="width: 100%; height: auto;">';
+                      } else if (data.message === 'No matching image found') {
+                          alert('No matching image found');
+                      }
+                      searchButtonLocked = false;
+                      document.getElementById('searchButton').disabled = false;
+                  });
+            }
+        }
+
+        // 允许多次上传和查询
+        document.getElementById('searchInput').addEventListener('input', function() {
+            searchButtonLocked = false;
+            document.getElementById('searchButton').disabled = false;
+        });
+    </script>
+</body>
+</html>

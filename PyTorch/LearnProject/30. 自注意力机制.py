@@ -30,3 +30,31 @@ print(attention_weights.sum(dim=1))
 context_vector = torch.matmul(attention_weights, embedded_sentence)
 print(context_vector.shape)
 print(context_vector[1])
+print()
+
+# 缩放点积注意力
+# 初始化查询、键、值向量
+torch.manual_seed(0)
+d = embedded_sentence.shape[1]
+U_query = torch.randn(d, d)
+U_key = torch.randn(d, d)
+U_value = torch.randn(d, d)
+
+querys = U_query.matmul(embedded_sentence.T).T
+keys = U_key.matmul(embedded_sentence.T).T
+values = U_value.matmul(embedded_sentence.T).T
+
+query_2 = U_query.matmul(embedded_sentence[1])
+print(torch.allclose(querys[1], query_2))
+
+# 计算非归一化的注意力权重
+omega_2 = query_2.matmul(keys.T)
+print(omega_2)
+
+# 计算归一化的注意力权重
+attention_weights_2 = F.softmax(omega_2 / d ** 0.5, dim=0)
+print(attention_weights_2)
+
+# 计算上下文嵌入向量
+context_vector_2 = attention_weights_2.matmul(values)
+print(context_vector_2)

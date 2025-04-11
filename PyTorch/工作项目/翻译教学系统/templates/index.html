@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能翻译教学系统</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 字体图标库 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- 自定义样式 -->
+    <style>
+        :root {
+            --primary-color: #2b6cb0;
+            --secondary-color: #4299e1;
+            --accent-color: #63b3ed;
+            --light-color: #ebf8ff;
+            --dark-color: #2a4365;
+            --success-color: #48bb78;
+            --error-color: #f56565;
+            --text-color: #2d3748;
+            --text-light: #718096;
+            --bg-color: #f7fafc;
+        }
+
+        body {
+            font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+            font-size: 1.5rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-color);
+            border-color: var(--dark-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+
+        .knowledge-panel {
+            background-color: rgba(248, 249, 250, 0);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 4px 4px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .knowledge-tip {
+            background-color: white;
+            border-left: 4px solid #4299e1;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 4px 4px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .knowledge-tip strong {
+            color: #2a4365;
+        }
+
+        .knowledge-tip p {
+            margin: 5px 0 0;
+            color: #4a5568;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+
+        .translation-area {
+            min-height: 150px;
+            resize: vertical;
+            border-color: #e2e8f0;
+        }
+
+        .translation-prompt {
+        white-space: pre-wrap; /* 保留空格和换行 */
+        word-spacing: 5px; /* 增加单词间距 */
+        }
+
+        /* 知识点选项卡样式优化 */
+        #knowledgeTabs {
+            background-color: #f0f5ff;
+            border-radius: 6px;
+            padding: 3px;
+            margin-bottom: 15px;
+        }
+
+        #knowledgeTabs .nav-link {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+            color: var(--text-color);
+            border: none;
+            border-radius: 4px;
+            margin: 2px;
+            background-color: transparent;
+            transition: all 0.2s ease;
+        }
+
+        #knowledgeTabs .nav-link:hover {
+            background-color: rgba(66, 153, 225, 0.1);
+            color: var(--primary-color);
+        }
+
+        #knowledgeTabs .nav-link.active {
+            color: white;
+            background-color: var(--primary-color);
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 确保选项卡内容区域与选项卡样式匹配 */
+        .tab-content {
+            background-color: white;
+            border-radius: 6px;
+            padding: 3px;
+        }
+
+        .word-correct {
+            color: var(--success-color);
+            font-weight: 500;
+        }
+
+        .word-incorrect {
+            color: var(--error-color);
+            text-decoration: line-through;
+            margin-right: 5px;
+        }
+
+        .word-suggestion {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .translation-mode-card {
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .translation-mode-card.active {
+            border: 2px solid var(--primary-color);
+        }
+
+        /* 在原有样式基础上添加以下样式 */
+        .translation-container {
+            display: none; /* 默认隐藏翻译内容区 */
+        }
+
+        .progress-chart {
+            height: 250px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 15px;
+        }
+
+        .loading-spinner {
+            display: none;
+            color: var(--primary-color);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .feature-icon {
+                font-size: 1.5rem;
+            }
+        }
+
+        #loginTabs .nav-link {
+            color: var(--dark-color) !important;
+            font-weight: 600;
+            background-color: #f0f0f0;
+        }
+
+        #loginTabs .nav-link.active {
+            background-color: var(--primary-color);
+            color: white !important;
+        }
+
+        /* 添加自定义句子模态框样式 */
+        .custom-sentence-form textarea {
+            min-height: 100px;
+        }
+
+        /* 知识点编辑按钮样式 */
+        .knowledge-tip {
+            position: relative;
+        }
+
+        .edit-knowledge-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .edit-knowledge-btn:hover {
+            opacity: 1;
+        }
+
+        .add-knowledge-btn {
+            margin-bottom: 15px;
+        }
+
+        /* 知识点编辑模态框样式 */
+        .knowledge-edit-form textarea {
+            min-height: 80px;
+        }
+
+        /* 高亮显示编辑模式下的知识点卡片 */
+        .knowledge-tip.editing {
+            border: 2px dashed var(--primary-color);
+            background-color: rgba(66, 153, 225, 0.05);
+        }
+
+        /* 添加自定义句子按钮 */
+        .add-sentence-btn {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            z-index: 10;
+        }
+
+        /* 知识点编辑模式切换按钮 */
+        .toggle-edit-mode {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            z-index: 10;
+        }
+
+        /* 为卡片标题区域添加相对定位，方便放置绝对定位的按钮 */
+        .card-header {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-translate me-2"></i>智能翻译教学系统
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#home"><i class="bi bi-house-door me-1"></i>首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#translation"><i class="bi bi-pencil-square me-1"></i>翻译练习</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#progress"><i class="bi bi-graph-up me-1"></i>学习进度</a>
+                </li>
+                <li class="nav-item" id="logoutNav" style="display: none;">
+                    <a class="nav-link" href="#" id="logoutBtn">
+                        <i class="bi bi-box-arrow-right me-1"></i>退出登录
+                    </a>
+                </li>
+                <li class="nav-item" style="display: none;" id="userNav">
+                    <a class="nav-link" href="#" id="userInfo">
+                        <i class="bi bi-person-fill me-1"></i><span id="username">用户</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="loginNav">
+                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <i class="bi bi-person-circle me-1"></i>登录/注册
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 主内容区 -->
+<div class="container mt-4" id="home">
+    <!-- 欢迎信息 -->
+    <div class="row mb-5 fade-in">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h1 class="display-4 fw-bold mb-4">提升您的中英翻译能力</h1>
+            <p class="lead mb-4">我们的智能翻译教学系统结合了先进的AI技术和专业的教学方法，为您提供个性化的翻译学习体验。</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="#translation" class="btn btn-primary btn-lg px-4 gap-3">
+                    <i class="bi bi-pencil-square me-2"></i>开始练习
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 功能特点 -->
+    <div class="row mb-5 fade-in">
+        <div class="col-12 mb-4">
+            <h2 class="section-title">我们的特色功能</h2>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <i class="bi bi-lightbulb feature-icon"></i>
+                    <h5 class="card-title">智能提示翻译</h5>
+                    <p class="card-text">根据单词首字母提示，逐步引导您完成翻译，提高词汇记忆和使用能力。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <i class="bi bi-layers feature-icon"></i>
+                    <h5 class="card-title">逐层翻译学习</h5>
+                    <p class="card-text">将复杂句子分解为多个层次，逐步掌握句子结构，提高长难句翻译能力。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <i class="bi bi-check2-circle feature-icon"></i>
+                    <h5 class="card-title">智能批改反馈</h5>
+                    <p class="card-text">即时提供翻译评估和改进建议，帮助您识别和纠正常见错误。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <i class="bi bi-graph-up feature-icon"></i>
+                    <h5 class="card-title">个性化学习进度</h5>
+                    <p class="card-text">追踪您的学习历程，分析优势和不足，提供个性化的学习建议。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 翻译练习区 -->
+    <div id="translation" class="row mb-5 fade-in">
+        <div class="col-12 mb-4">
+            <h2 class="section-title">翻译练习</h2>
+        </div>
+
+        <!-- 翻译模式选择 -->
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-gear me-2"></i>选择练习模式
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="card translation-mode-card active" data-mode="prompt">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-alphabet feature-icon"></i>
+                                    <h5>提示翻译</h5>
+                                    <p class="small">显示目标语言首字母提示</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card translation-mode-card" data-mode="independent">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-person-bounding-box feature-icon"></i>
+                                    <h5>独立提示翻译</h5>
+                                    <p class="small">先独立翻译，需要时查看提示</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card translation-mode-card" data-mode="layered">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-layers feature-icon"></i>
+                                    <h5>逐层翻译</h5>
+                                    <p class="small">分层学习复杂句子结构</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card translation-mode-card" data-mode="full">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-file-text feature-icon"></i>
+                                    <h5>整句翻译</h5>
+                                    <p class="small">完整句子翻译练习</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 翻译内容区 -->
+        <div class="col-md-6 mb-4 translation-container" id="sourceContainer">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-translate me-2"></i>原文（中文）</span>
+                    <div id="sentenceControlButtons">
+                        <!-- 按钮将由JS动态添加 -->
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="sourceText" class="mb-3">
+                        正在加载句子...
+                    </div>
+                    <div id="promptArea" class="mb-3">
+                        <strong>翻译提示：</strong>
+                        <div id="translationPrompt" class="p-2 bg-light rounded translation-prompt">
+                            正在加载提示...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4 translation-container" id="translationContainer">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="bi bi-pencil me-2"></i>翻译（英文）
+                </div>
+                <div class="card-body">
+                    <textarea id="translationInput" class="form-control translation-area mb-3" placeholder="请输入您的翻译..."></textarea>
+                    <div class="d-flex justify-content-between">
+                        <div id="hintControls">
+                            <div class="hint-prompt-mode" style="display: none;">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="togglePromptHint" checked>
+                                    <label class="form-check-label" for="togglePromptHint">显示首字母提示</label>
+                                </div>
+                            </div>
+
+                            <div class="hint-independent-mode" style="display: none;">
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check form-switch me-3">
+                                        <input class="form-check-input" type="checkbox" id="toggleIndependentHint">
+                                        <label class="form-check-label" for="toggleIndependentHint">显示提示</label>
+                                    </div>
+                                    <div class="input-group" style="width: 200px;">
+                                        <span class="input-group-text">提示单词数量</span>
+                                        <select class="form-select" id="hintLetterCount">
+                                            <option value="1">1个</option>
+                                            <option value="2">2个</option>
+                                            <option value="3" selected>3个</option>
+                                            <option value="5">5个</option>
+                                            <option value="0">全部</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="hint-layered-mode" style="display: none;">
+                                <button id="nextLayerBtn" class="btn btn-outline-primary">
+                                    <i class="bi bi-layers me-1"></i>显示下一层
+                                </button>
+                            </div>
+                        </div>
+
+                        <button id="checkTranslationBtn" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>检查翻译
+                            <span class="spinner-border spinner-border-sm loading-spinner" role="status"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 翻译批改结果 -->
+        <div class="col-12 mb-4" id="resultSection" style="display: none;">
+            <div class="card fade-in">
+                <div class="card-header bg-light">
+                    <i class="bi bi-check-square me-2"></i>翻译结果
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5>您的翻译</h5>
+                            <div id="userTranslation" class="mb-3 p-3 bg-light rounded"></div>
+
+                            <h5>参考翻译</h5>
+                            <div id="referenceTranslation" class="mb-3 p-3 bg-light rounded">
+                                We are learning how to express our ideas and views in English.
+                            </div>
+
+                            <h5>批改结果</h5>
+                            <div id="correctionResult" class="mb-3 p-3 bg-light rounded">
+                                <span class="word-correct">We</span>
+                                <span class="word-correct">are</span>
+                                <span class="word-correct">learning</span>
+                                <span class="word-correct">how</span>
+                                <span class="word-correct">to</span>
+                                <span class="word-incorrect">speak</span> <span class="word-suggestion">express</span>
+                                <span class="word-correct">our</span>
+                                <span class="word-correct">ideas</span>
+                                <span class="word-correct">and</span>
+                                <span class="word-incorrect">opinions</span> <span class="word-suggestion">views</span>
+                                <span class="word-correct">in</span>
+                                <span class="word-correct">English</span>
+                            </div>
+
+                            <!-- 新增评估总结区域 -->
+                            <div id="evaluationSummary" class="alert alert-primary mb-3">
+                                <h6 class="mb-2"><i class="bi bi-journal-check me-2"></i>评估总结</h6>
+                                <div id="evaluationContent" class="mb-0">
+                                    总体评分：良好（85%）
+                                    语义完整度：90%
+                                    语法错误：1处
+                                    拼写错误：0处
+                                    建议：请注意句子结构和语法规则
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-info-circle me-2"></i>准确率：<strong id="accuracyRate">85%</strong>
+                                </div>
+                                <div>
+                                    <span class="badge bg-primary me-2">语义得分: <span id="semanticScore">90%</span></span>
+                                    <span class="badge bg-warning me-2">语法错误: <span id="grammarErrors">1</span></span>
+                                    <span class="badge bg-danger">拼写错误: <span id="spellingErrors">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <h5>知识点提示
+                                <button id="toggleEditMode" class="btn btn-sm btn-outline-secondary toggle-edit-mode">
+                                    <i class="bi bi-plus-circle me-1"></i>添加模式
+                                </button>
+                            </h5>
+                            <div id="knowledgePanel" class="knowledge-panel">
+                                <!-- 添加选项卡导航 -->
+                                <ul class="nav nav-pills nav-fill mb-3" id="knowledgeTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="grammar-tab" data-bs-toggle="tab" data-bs-target="#grammar-tab-pane" type="button" role="tab">
+                                            <i class="bi bi-book me-1"></i>语法点
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="phrases-tab" data-bs-toggle="tab" data-bs-target="#phrases-tab-pane" type="button" role="tab">
+                                            <i class="bi bi-chat-square-text me-1"></i>词组
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="collocations-tab" data-bs-toggle="tab" data-bs-target="#collocations-tab-pane" type="button" role="tab">
+                                            <i class="bi bi-link-45deg me-1"></i>搭配
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="layers-tab" data-bs-toggle="tab" data-bs-target="#layers-tab-pane" type="button" role="tab">
+                                            <i class="bi bi-layers me-1"></i>层级
+                                        </button>
+                                    </li>
+                                </ul>
+
+                                <!-- 选项卡内容 -->
+                                <div class="tab-content" id="knowledgeTabsContent">
+                                    <!-- 语法点选项卡 -->
+                                    <div class="tab-pane fade show active" id="grammar-tab-pane" role="tabpanel" aria-labelledby="grammar-tab" tabindex="0">
+                                        <button class="btn btn-sm btn-outline-primary add-knowledge-btn w-100 d-none" data-type="grammar" id="addGrammarBtn">
+                                            <i class="bi bi-plus-circle me-1"></i>添加语法点
+                                        </button>
+                                        <div id="grammarPoints" class="knowledge-content">
+                                            <div class="text-center py-3 text-muted">
+                                                <i class="bi bi-info-circle"></i> 暂无语法点数据
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 词组选项卡 -->
+                                    <div class="tab-pane fade" id="phrases-tab-pane" role="tabpanel" aria-labelledby="phrases-tab" tabindex="0">
+                                        <button class="btn btn-sm btn-outline-primary add-knowledge-btn w-100 d-none" data-type="phrases" id="addPhraseBtn">
+                                            <i class="bi bi-plus-circle me-1"></i>添加词组
+                                        </button>
+                                        <div id="phrasesPoints" class="knowledge-content">
+                                            <div class="text-center py-3 text-muted">
+                                                <i class="bi bi-info-circle"></i> 暂无词组数据
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 搭配选项卡 -->
+                                    <div class="tab-pane fade" id="collocations-tab-pane" role="tabpanel" aria-labelledby="collocations-tab" tabindex="0">
+                                        <button class="btn btn-sm btn-outline-primary add-knowledge-btn w-100 d-none" data-type="collocations" id="addCollocationBtn">
+                                            <i class="bi bi-plus-circle me-1"></i>添加搭配
+                                        </button>
+                                        <div id="collocationsPoints" class="knowledge-content">
+                                            <div class="text-center py-3 text-muted">
+                                                <i class="bi bi-info-circle"></i> 暂无搭配数据
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 层级选项卡 -->
+                                    <div class="tab-pane fade" id="layers-tab-pane" role="tabpanel" aria-labelledby="layers-tab" tabindex="0">
+                                        <button class="btn btn-sm btn-outline-primary add-knowledge-btn w-100 d-none" data-type="layers" id="addLayerBtn">
+                                            <i class="bi bi-plus-circle me-1"></i>添加句子层级
+                                        </button>
+                                        <div id="sentenceLayers" class="knowledge-content">
+                                            <div class="text-center py-3 text-muted">
+                                                <i class="bi bi-info-circle"></i> 暂无句子层级数据
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 添加难度指示器 -->
+                            <div class="mt-3">
+                                <h6 class="mb-2">难度指示</h6>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-success me-2">简单</span>
+                                    <div class="progress flex-grow-1" style="height: 8px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 33%"></div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-warning me-2">中等</span>
+                                    <div class="progress flex-grow-1" style="height: 8px;">
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 66%"></div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-danger me-2">困难</span>
+                                    <div class="progress flex-grow-1" style="height: 8px;">
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <button id="retryBtn" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-repeat me-1"></i>重新翻译
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 学习进度区 -->
+    <div id="progress" class="row mb-5 fade-in">
+        <div class="col-12 mb-4">
+            <h2 class="section-title">学习进度</h2>
+            <div class="alert alert-warning" id="progressLoginAlert">
+                <i class="bi bi-exclamation-triangle me-2"></i>请登录后查看您的学习进度
+            </div>
+        </div>
+
+        <div class="col-md-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="bi bi-graph-up me-2"></i>进度概览
+                </div>
+                <div class="card-body">
+                    <div class="progress-chart" id="accuracyChart" style="height: 300px;">
+                        <!-- 图表将在这里显示 -->
+                        <div class="text-center py-5">
+                            <i class="bi bi-bar-chart-line feature-icon"></i>
+                            <p>准确率趋势图将显示在这里</p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center p-3">
+                                <h3 class="text-primary" id="completedExercises">154</h3>
+                                <p class="small mb-0">已完成练习</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center p-3">
+                                <h3 class="text-primary" id="averageAccuracy">78%</h3>
+                                <p class="small mb-0">平均准确率</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center p-3">
+                                <h3 class="text-primary" id="consecutiveDays">12</h3>
+                                <p class="small mb-0">连续学习天数</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="bi bi-trophy me-2"></i>学习成就
+                </div>
+                <div class="card-body" id="achievementsArea">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary rounded-circle p-2 me-3">
+                            <i class="bi bi-star-fill text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">翻译新手</h6>
+                            <small>完成10次翻译练习</small>
+                        </div>
+                        <span class="ms-auto badge bg-success">已获得</span>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary rounded-circle p-2 me-3">
+                            <i class="bi bi-award text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">精准翻译者</h6>
+                            <small>连续5次翻译准确率超过90%</small>
+                        </div>
+                        <span class="ms-auto badge bg-success">已获得</span>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-secondary rounded-circle p-2 me-3">
+                            <i class="bi bi-journal-check text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">翻译大师</h6>
+                            <small>完成100次翻译练习</small>
+                        </div>
+                        <span class="ms-auto badge bg-secondary">进行中 (54%)</span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <div class="bg-secondary rounded-circle p-2 me-3">
+                            <i class="bi bi-calendar-check text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">坚持不懈</h6>
+                            <small>连续30天进行练习</small>
+                        </div>
+                        <span class="ms-auto badge bg-secondary">进行中 (40%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 登录/注册模态框 -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-person-circle me-2"></i>用户中心</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <ul class="nav nav-pills nav-fill mb-4" id="loginTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-pill" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-tab-pane" type="button" role="tab" aria-controls="login-tab-pane" aria-selected="true">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>登录
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill" id="register-tab" data-bs-toggle="tab" data-bs-target="#register-tab-pane" type="button" role="tab" aria-controls="register-tab-pane" aria-selected="false">
+                            <i class="bi bi-person-plus me-2"></i>注册
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- 操作反馈提示 -->
+                <div class="alert alert-danger d-none" id="loginAlert" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i><span id="loginAlertMessage"></span>
+                </div>
+                <div class="alert alert-success d-none" id="loginSuccess" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i><span id="loginSuccessMessage"></span>
+                </div>
+
+                <div class="tab-content" id="loginTabsContent">
+                    <!-- 登录表单 -->
+                    <div class="tab-pane fade show active" id="login-tab-pane" role="tabpanel" aria-labelledby="login-tab" tabindex="0">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                    <input type="text" class="form-control border-start-0" id="loginUsername" placeholder="请输入用户名" required>
+                                </div>
+                                <div class="invalid-feedback" id="loginUsernameError"></div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                                    <input type="password" class="form-control border-start-0" id="loginPassword" placeholder="请输入密码" required>
+                                    <button class="btn btn-outline-secondary border-start-0 toggle-password" type="button" data-target="loginPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback" id="loginPasswordError"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-4">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="rememberMe">
+                                    <label class="form-check-label" for="rememberMe">记住我</label>
+                                </div>
+                                <a href="#" class="text-decoration-none" id="forgotPassword">忘记密码?</a>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>登录
+                                <span class="spinner-border spinner-border-sm d-none ms-2" id="loginSpinner" role="status"></span>
+                            </button>
+
+                            <div class="text-center">
+                                <p class="text-muted">还没有账户？<a href="#" id="switchToRegister" class="text-primary">立即注册</a></p>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- 注册表单 -->
+                    <div class="tab-pane fade" id="register-tab-pane" role="tabpanel" aria-labelledby="register-tab" tabindex="0">
+                        <form id="registerForm">
+                            <div class="mb-3">
+                                <label for="registerUsername" class="form-label">用户名</label>
+                                <input type="text" class="form-control" id="registerUsername" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerEmail" class="form-label">电子邮箱</label>
+                                <input type="email" class="form-control" id="registerEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerPassword" class="form-label">密码</label>
+                                <input type="password" class="form-control" id="registerPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">确认密码</label>
+                                <input type="password" class="form-control" id="confirmPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">注册</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加自定义句子模态框 -->
+<div class="modal fade" id="addSentenceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>添加自定义句子</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSentenceForm" class="custom-sentence-form">
+                    <div class="mb-3">
+                        <label for="customChineseSentence" class="form-label">中文句子</label>
+                        <textarea class="form-control" id="customChineseSentence" required placeholder="请输入中文句子..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sentenceDifficulty" class="form-label">难度级别</label>
+                        <select class="form-select" id="sentenceDifficulty">
+                            <option value="1">简单</option>
+                            <option value="2" selected>中等</option>
+                            <option value="3">困难</option>
+                        </select>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="useImmediately" checked>
+                        <label class="form-check-label" for="useImmediately">立即使用此句子</label>
+                    </div>
+                    <div class="alert alert-danger d-none" id="sentenceFormError"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveSentenceBtn">
+                    <i class="bi bi-save me-1"></i>保存
+                    <span class="spinner-border spinner-border-sm d-none" id="saveSentenceSpinner"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑知识点模态框 -->
+<div class="modal fade" id="editKnowledgeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i><span id="knowledgeModalTitle">添加知识点</span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editKnowledgeForm" class="knowledge-edit-form">
+                    <input type="hidden" id="knowledgeId">
+                    <input type="hidden" id="knowledgeType">
+                    <input type="hidden" id="editMode" value="edit">
+
+                    <div class="mb-3">
+                        <label for="knowledgeText" class="form-label">知识点内容</label>
+                        <input type="text" class="form-control" id="knowledgeText" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="knowledgeExplanation" class="form-label">解释</label>
+                        <textarea class="form-control" id="knowledgeExplanation" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="knowledgeExample" class="form-label">示例</label>
+                        <textarea class="form-control" id="knowledgeExample"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="knowledgeDifficulty" class="form-label">难度级别</label>
+                        <select class="form-select" id="knowledgeDifficulty">
+                            <option value="1">简单</option>
+                            <option value="2" selected>中等</option>
+                            <option value="3">困难</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-danger d-none" id="knowledgeFormError"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger me-auto d-none" id="deleteKnowledgeBtn">
+                    <i class="bi bi-trash me-1"></i>删除
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveKnowledgeBtn">
+                    <i class="bi bi-save me-1"></i>保存
+                    <span class="spinner-border spinner-border-sm d-none" id="saveKnowledgeSpinner"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="bg-dark text-white py-4 mt-5">
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h5><i class="bi bi-translate me-2"></i>智能翻译教学系统</h5>
+            <p class="small">基于先进的AI技术和专业的教学方法，为您提供个性化的翻译学习体验。</p>
+        </div>
+        <div class="col-md-3">
+            <h5>快速链接</h5>
+            <ul class="list-unstyled">
+                <li><a href="#translation" class="text-white">翻译练习</a></li>
+                <li><a href="#progress" class="text-white">学习进度</a></li>
+            </ul>
+        </div>
+        <div class="col-md-3">
+            <h5>联系我们</h5>
+            <ul class="list-unstyled">
+                <li><i class="bi bi-envelope me-2"></i>support@translator.com</li>
+                <li><i class="bi bi-telephone me-2"></i>400-123-4567</li>
+            </ul>
+        </div>
+    </div>
+    <hr>
+    <div class="text-center">
+        <p class="small mb-0">© 2023 智能翻译教学系统 版权所有</p>
+    </div>
+</div>
+</footer>
+
+<!-- Bootstrap JS & Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- 图表库 -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
+<!-- 自定义脚本 -->
+<script>
+// API请求工具函数
+async function sendRequest(url, method, data) {
+    const options = {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+
+    if (data) {
+        options.body = JSON.stringify(data);
+    }
+
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(`HTTP错误: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('请求错误:', error);
+        return { error: error.message || '网络请求失败' };
+    }
+}
+
+// 登录表单提交
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+
+    const result = await sendRequest('/login', 'POST', {
+        username: username,
+        password: password
+    });
+
+    if (result.success) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('username', username);
+
+        // 关闭登录模态框
+        const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+        loginModal.hide();
+
+        // 更新界面
+        checkLoginStatus();
+
+        alert('登录成功！');
+    } else {
+        alert('登录失败: ' + (result.error || '未知错误'));
+    }
+});
+
+// 注册表单提交
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('registerUsername').value;
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (password !== confirmPassword) {
+        alert('两次密码输入不一致');
+        return;
+    }
+
+    const result = await sendRequest('/register', 'POST', {
+        username: username,
+        email: email,
+        password: password
+    });
+
+    if (result.success) {
+        alert('注册成功！请登录');
+        document.getElementById('login-tab').click();
+    } else {
+        alert('注册失败: ' + (result.error || '未知错误'));
+    }
+});
+
+// 句子数据和相关变量
+let currentSentence = null;
+
+// 从后端获取随机生成的句子数据
+async function fetchSentences() {
+    try {
+        const result = await sendRequest('/get_random_sentence', 'POST');
+
+        if (result.error) {
+            console.error('获取句子出错:', result.error);
+            showErrorMessage('无法获取翻译句子，请检查网络连接或联系管理员');
+            return null;
+        }
+
+        return result;
+    } catch (error) {
+        console.error('获取句子时发生错误:', error);
+        showErrorMessage('获取句子时发生错误，请稍后再试');
+        return null;
+    }
+}
+
+// 显示错误信息
+function showErrorMessage(message) {
+    const sourceTextElement = document.getElementById('sourceText');
+    sourceTextElement.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+
+    const promptElement = document.getElementById('translationPrompt');
+    promptElement.textContent = '';
+}
+
+// 加载句子
+function loadSentence(sentence) {
+    document.getElementById('sourceText').textContent = sentence.source;
+    document.getElementById('translationPrompt').textContent = sentence.prompt;
+    document.getElementById('referenceTranslation').textContent = sentence.reference;
+    document.getElementById('translationInput').value = '';
+    document.getElementById('resultSection').style.display = 'none';
+}
+
+// 更新句子提示字母数量
+function updateHintLetters() {
+    if (currentSentence) {
+        // 重新获取句子以更新提示
+        refreshSentences();
+    }
+}
+
+// 刷新句子
+async function refreshSentences() {
+    // 显示加载提示
+    document.getElementById('sourceText').innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">加载中...</span></div> 正在生成新句子...';
+    document.getElementById('translationPrompt').textContent = '';
+
+    // 获取新句子 - 只获取一个
+    currentSentence = await fetchSentences();
+
+    if (currentSentence) {
+        loadSentence(currentSentence);
+    }
+}
+
+// 添加刷新句子按钮
+function addRefreshButton() {
+    const buttonContainer = document.getElementById('sentenceControlButtons');
+
+    // 清空现有按钮
+    buttonContainer.innerHTML = '';
+
+    // 添加按钮
+    const refreshButton = document.createElement('button');
+    refreshButton.className = 'btn btn-sm btn-outline-primary me-2';
+    refreshButton.id = 'refreshSentences';
+    refreshButton.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
+    refreshButton.title = '获取新句子';
+
+    const addSentenceButton = document.createElement('button');
+    addSentenceButton.className = 'btn btn-sm btn-outline-success';
+    addSentenceButton.id = 'addSentenceBtn';
+    addSentenceButton.setAttribute('data-bs-toggle', 'modal');
+    addSentenceButton.setAttribute('data-bs-target', '#addSentenceModal');
+    addSentenceButton.innerHTML = '<i class="bi bi-plus-circle"></i>';
+    addSentenceButton.title = '添加自定义句子';
+
+    buttonContainer.appendChild(refreshButton);
+    buttonContainer.appendChild(addSentenceButton);
+
+    document.getElementById('refreshSentences').addEventListener('click', refreshSentences);
+}
+
+
+// 检查翻译按钮
+document.getElementById('checkTranslationBtn').addEventListener('click', async function() {
+    // 禁用按钮并修改文本
+    this.disabled = true;
+    const originalText = this.innerHTML;
+    this.innerHTML = `
+        <span class="spinner-border spinner-border-sm text-white me-2" role="status"></span>
+        正在分析...
+    `;
+
+    const chineseText = document.getElementById('sourceText').textContent.trim();
+    const userTranslation = document.getElementById('translationInput').value;
+
+    // 获取当前模式
+    const activeCard = document.querySelector('.translation-mode-card.active');
+    const mode = activeCard.getAttribute('data-mode');
+
+    try {
+        // 使用当前句子的参考翻译
+        const referenceTranslation = currentSentence.reference;
+
+        // 发送校正请求
+        const correctResult = await sendRequest('/correct', 'POST', {
+            user_translation: userTranslation,
+            target_translation: referenceTranslation,
+            source_text: chineseText,
+            translation_type: mode
+        });
+
+        // 获取知识点
+        const knowledgeResult = await sendRequest('/knowledge_points', 'POST', {
+            sentence: chineseText,
+            reference: referenceTranslation
+        });
+
+        // 恢复按钮状态
+        this.disabled = false;
+        this.innerHTML = originalText;
+
+        // 更新界面显示结果
+        document.getElementById('resultSection').style.display = 'block';
+        document.getElementById('userTranslation').textContent = userTranslation;
+        document.getElementById('referenceTranslation').textContent = referenceTranslation;
+
+        // 使用新的彩色批改结果
+        if (correctResult.colored_correction) {
+            document.getElementById('correctionResult').innerHTML = correctResult.colored_correction;
+        } else {
+            // 构建简单的批改结果
+            document.getElementById('correctionResult').innerHTML = '<div class="alert alert-warning">无法分析翻译结果</div>';
+        }
+
+        // 更新准确率和评估指标
+        document.getElementById('accuracyRate').textContent = (correctResult.accuracy || '0') + '%';
+        document.getElementById('semanticScore').textContent = (correctResult.semantic_score || '0') + '%';
+        document.getElementById('grammarErrors').textContent = correctResult.grammar_errors || '0';
+        document.getElementById('spellingErrors').textContent = correctResult.spelling_errors || '0';
+
+        // 更新评估总结
+        document.getElementById('evaluationContent').innerText = correctResult.evaluation_summary || '无评估数据';
+
+        // 处理知识点数据并展示
+        if (knowledgeResult && knowledgeResult.status === 'success') {
+            displayKnowledgePoints(knowledgeResult);
+        } else {
+            console.error('获取知识点失败:', knowledgeResult);
+        }
+
+        // 更新学习进度
+        loadUserProgress();
+    } catch (error) {
+        console.error('处理翻译时出错:', error);
+        this.disabled = false;
+        this.innerHTML = originalText;
+        alert('处理翻译时出错: ' + error.message);
+    }
+});
+
+// 显示知识点的函数
+function displayKnowledgePoints(result) {
+    if (!result || !result.status || result.status !== 'success') {
+        // 显示错误信息
+        document.getElementById('grammarPoints').innerHTML = '<div class="alert alert-warning">获取知识点失败</div>';
+        return;
+    }
+
+    const data = result.data || {};
+
+    // 1. 处理语法点
+    displayGrammarPoints(data.grammar_points || []);
+
+    // 2. 处理短语
+    displayPhrases(data.phrases || []);
+
+    // 3. 处理搭配
+    displayCollocations(data.collocations || []);
+
+    // 4. 处理句子层级
+    displaySentenceLayers(data.sentence_layers || []);
+
+    // 默认打开语法点选项卡
+    document.getElementById('grammar-tab').click();
+}
+
+// 显示语法点
+function displayGrammarPoints(grammarPoints) {
+    const container = document.getElementById('grammarPoints');
+
+    if (!grammarPoints || grammarPoints.length === 0) {
+        container.innerHTML = '<div class="text-center py-3 text-muted"><i class="bi bi-info-circle"></i> 暂无语法点数据</div>';
+        return;
+    }
+
+    let html = '';
+
+    grammarPoints.forEach(point => {
+        // 根据难度级别设置样式
+        const difficultyClass = getDifficultyClass(point.difficulty);
+
+        html += `
+        <div class="knowledge-tip mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong>${point.name || point.text}</strong>
+                <span class="badge ${difficultyClass}">
+                    ${getDifficultyText(point.difficulty)}
+                </span>
+            </div>
+            <p>${point.explanation}</p>
+            ${point.example ? `<div class="small fst-italic mt-1">示例: ${point.example}</div>` : ''}
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+// 显示短语
+function displayPhrases(phrases) {
+    const container = document.getElementById('phrasesPoints');
+
+    if (!phrases || phrases.length === 0) {
+        container.innerHTML = '<div class="text-center py-3 text-muted"><i class="bi bi-info-circle"></i> 暂无词组数据</div>';
+        return;
+    }
+
+    let html = '';
+
+    phrases.forEach(phrase => {
+        const difficultyClass = getDifficultyClass(phrase.difficulty);
+
+        html += `
+        <div class="knowledge-tip mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong>${phrase.text}</strong>
+                <span class="badge ${difficultyClass}">
+                    ${getDifficultyText(phrase.difficulty)}
+                </span>
+            </div>
+            <p>${phrase.explanation}</p>
+            ${phrase.example ? `<div class="small fst-italic mt-1">示例: ${phrase.example}</div>` : ''}
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+// 显示搭配
+function displayCollocations(collocations) {
+    const container = document.getElementById('collocationsPoints');
+
+    if (!collocations || collocations.length === 0) {
+        container.innerHTML = '<div class="text-center py-3 text-muted"><i class="bi bi-info-circle"></i> 暂无搭配数据</div>';
+        return;
+    }
+
+    let html = '';
+
+    collocations.forEach(collocation => {
+        const difficultyClass = getDifficultyClass(collocation.difficulty);
+
+        html += `
+        <div class="knowledge-tip mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong>${collocation.text}</strong>
+                <span class="badge ${difficultyClass}">
+                    ${getDifficultyText(collocation.difficulty)}
+                </span>
+            </div>
+            <p>${collocation.explanation}</p>
+            ${collocation.example ? `<div class="small fst-italic mt-1">示例: ${collocation.example}</div>` : ''}
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+// 显示句子层级
+function displaySentenceLayers(layers) {
+    const container = document.getElementById('sentenceLayers');
+
+    if (!layers || layers.length === 0) {
+        container.innerHTML = '<div class="text-center py-3 text-muted"><i class="bi bi-info-circle"></i> 暂无句子层级数据</div>';
+        return;
+    }
+
+    let html = '<div class="list-group">';
+
+    layers.forEach((layer, index) => {
+        // 根据索引计算层级难度
+        const layerLevel = Math.min(Math.floor((index / (layers.length - 1)) * 3) + 1, 3);
+        const difficultyClass = getDifficultyClass(layerLevel);
+
+        html += `
+        <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong>层级 ${index + 1}</strong>
+                <span class="badge ${difficultyClass}">
+                    ${getDifficultyText(layerLevel)}
+                </span>
+            </div>
+            <p class="mb-0">${layer}</p>
+        </div>`;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// 根据难度返回对应的CSS类
+function getDifficultyClass(difficulty) {
+    difficulty = parseInt(difficulty); // 确保转换为数字
+
+    switch(difficulty) {
+        case 1:
+            return 'bg-success';
+        case 2:
+            return 'bg-warning';
+        case 3:
+            return 'bg-danger';
+        default:
+            return 'bg-secondary';
+    }
+}
+
+// 根据难度返回文本描述
+function getDifficultyText(difficulty) {
+    difficulty = parseInt(difficulty); // 确保转换为数字
+
+    switch(difficulty) {
+        case 1:
+            return '简单';
+        case 2:
+            return '中等';
+        case 3:
+            return '困难';
+        default:
+            return '未知';
+    }
+}
+
+// 加载用户进度
+async function loadUserProgress() {
+        // 检查用户是否已登录
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        if (!isLoggedIn) {
+            // 未登录时，将所有信息显示为0
+            document.getElementById('progressLoginAlert').style.display = 'none';
+            document.getElementById('completedExercises').textContent = '0';
+            document.getElementById('averageAccuracy').textContent = '0%';
+            document.getElementById('consecutiveDays').textContent = '0';
+
+            // 清空成就列表
+            document.getElementById('achievementsArea').innerHTML = '';
+            return;
+        }
+
+        const result = await sendRequest(`/user_progress`, 'GET');
+
+        if (result.error) {
+            if (result.error === '用户未登录') {
+                document.getElementById('progressLoginAlert').style.display = 'block';
+                return;
+            }
+            throw new Error(result.error);
+        }
+
+        // 隐藏登录提示
+        document.getElementById('progressLoginAlert').style.display = 'none';
+
+        // 更新进度数据
+        document.getElementById('completedExercises').textContent = result.total_exercises || 0;
+        document.getElementById('averageAccuracy').textContent = (result.avg_accuracy || 0) + '%';
+        document.getElementById('consecutiveDays').textContent = result.consecutive_days || 0;
+
+        // 更新成就
+        if (result.achievements) {
+            let achievementsHTML = '';
+            result.achievements.forEach(achievement => {
+                const statusClass = achievement.achieved ? 'bg-success' : 'bg-secondary';
+                const iconClass = achievement.achieved ? 'bg-primary' : 'bg-secondary';
+                const statusText = achievement.achieved ? '已获得' : `进行中 (${achievement.progress}%)`;
+
+                achievementsHTML += `
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="${iconClass} rounded-circle p-2 me-3">
+                            <i class="bi bi-${achievement.icon} text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">${achievement.name}</h6>
+                            <small>${achievement.description}</small>
+                        </div>
+                        <span class="ms-auto badge ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+            });
+
+            if (achievementsHTML) {
+                document.getElementById('achievementsArea').innerHTML = achievementsHTML;
+            }
+        }
+
+        // 创建准确率趋势图
+        if (result.accuracy_history && result.accuracy_history.length > 0) {
+            // 基于准备好的 DOM，初始化 ECharts 实例
+            const accuracyChartDom = document.getElementById('accuracyChart');
+            const accuracyChart = echarts.init(accuracyChartDom);
+
+            // 指定图表的配置项和数据
+            const option = {
+                title: {
+                    text: '准确率趋势图'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: result.accuracy_history.map((_, index) => `练习 ${index + 1}`)
+                },
+                yAxis: {
+                    type: 'value',
+                    min: Math.max(0, Math.min(...result.accuracy_history) - 10),
+                    max: 100
+                },
+                series: [{
+                    name: '准确率',
+                    type: 'line',
+                    data: result.accuracy_history,
+                    smooth: true,
+                    lineStyle: {
+                        width: 3,
+                        color: '#4299e1'
+                    },
+                    itemStyle: {
+                        color: '#4299e1'
+                    },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            {offset: 0, color: 'rgba(66, 153, 225, 0.5)'},
+                            {offset: 1, color: 'rgba(66, 153, 225, 0.1)'}
+                        ])
+                    }
+                }]
+            };
+
+            // 使用刚指定的配置项和数据显示图表
+            accuracyChart.setOption(option);
+
+            // 响应式调整
+            window.addEventListener('resize', function () {
+                accuracyChart.resize();
+            });
+        } else {
+            // 如果没有数据，显示提示信息
+            const accuracyChartContainer = document.getElementById('accuracyChart');
+            accuracyChartContainer.innerHTML = '<div class="text-center py-5"><p class="text-muted">暂无准确率数据</p></div>';
+        }
+    }
+
+    // 模式选择
+    document.querySelectorAll('.translation-mode-card').forEach(card => {
+        card.addEventListener('click', function() {
+            // 移除所有卡片的active类
+            document.querySelectorAll('.translation-mode-card').forEach(c => {
+                c.classList.remove('active');
+            });
+            // 添加当前卡片的active类
+            this.classList.add('active');
+
+            // 根据选择的模式更新界面
+            const mode = this.getAttribute('data-mode');
+            updateTranslationInterface(mode);
+
+            // 显示翻译内容区
+            document.getElementById('sourceContainer').style.display = 'block';
+            document.getElementById('translationContainer').style.display = 'block';
+        });
+    });
+
+// 更新翻译界面
+function updateTranslationInterface(mode) {
+    // 隐藏所有提示控件
+    document.querySelectorAll('#hintControls > div').forEach(div => {
+        div.style.display = 'none';
+    });
+
+    // 重置提示区域
+    const promptArea = document.getElementById('promptArea');
+
+    switch(mode) {
+        case 'prompt':
+            promptArea.style.display = 'block';
+            document.querySelector('.hint-prompt-mode').style.display = 'block';
+            // 更新提示区域为首字母
+            if (currentSentence) {
+                document.getElementById('translationPrompt').textContent = currentSentence.prompt;
+            }
+            break;
+        case 'independent':
+            promptArea.style.display = 'none';
+            document.querySelector('.hint-independent-mode').style.display = 'block';
+            break;
+        case 'layered':
+            promptArea.style.display = 'block';
+            document.querySelector('.hint-layered-mode').style.display = 'block';
+            // 初始化层级索引
+            window.currentLayerIndex = 0;
+            updateLayeredHint();
+            break;
+        case 'full':
+            promptArea.style.display = 'none';
+            // 整句翻译不显示任何提示控件
+            break;
+    }
+}
+
+// 为提示开关添加事件监听
+document.getElementById('togglePromptHint').addEventListener('change', function() {
+    const promptArea = document.getElementById('promptArea');
+    promptArea.style.display = this.checked ? 'block' : 'none';
+});
+
+document.getElementById('toggleIndependentHint').addEventListener('change', function() {
+    const promptArea = document.getElementById('promptArea');
+    promptArea.style.display = this.checked ? 'block' : 'none';
+
+    if (this.checked && currentSentence) {
+        updateIndependentHint();
+    }
+});
+
+// 更新独立提示翻译模式的提示
+function updateIndependentHint() {
+    if (!currentSentence) return;
+
+    const hintCount = parseInt(document.getElementById('hintLetterCount').value);
+    const data = {
+        text: currentSentence.source,
+        mode: 'independent',
+        hint_level: hintCount
+    };
+
+    document.getElementById('translationPrompt').textContent = '加载提示中...';
+
+    sendRequest('/translate', 'POST', data)
+        .then(result => {
+            if (result.prompt) {
+                document.getElementById('translationPrompt').textContent = result.prompt;
+            } else {
+                document.getElementById('translationPrompt').textContent = '无法加载提示';
+            }
+        })
+        .catch(error => {
+            document.getElementById('translationPrompt').textContent = '获取提示失败';
+            console.error('获取提示失败:', error);
+        });
+}
+
+// 监听提示字母数量变化
+document.getElementById('hintLetterCount').addEventListener('change', function() {
+    // 如果提示开关已打开，则更新提示
+    if (document.getElementById('toggleIndependentHint').checked) {
+        updateIndependentHint();
+    }
+});
+
+// 逐层提示按钮点击事件
+document.getElementById('nextLayerBtn').addEventListener('click', function() {
+    window.currentLayerIndex++;
+    updateLayeredHint();
+});
+
+// 更新逐层翻译的提示
+function updateLayeredHint() {
+    if (!currentSentence) return;
+
+    const reference = currentSentence.reference;
+    const words = reference.split(' ');
+    const layers = [
+        words.slice(0, 3).join(' '),
+        words.slice(0, 6).join(' '),
+        reference
+    ];
+
+    const layerIndex = Math.min(window.currentLayerIndex, layers.length - 1);
+    const buttonText = layerIndex >= layers.length - 1 ? '已显示全部层级' : '显示下一层';
+
+    document.getElementById('nextLayerBtn').innerHTML =
+        `<i class="bi bi-layers me-1"></i>${buttonText}`;
+    document.getElementById('nextLayerBtn').disabled = layerIndex >= layers.length - 1;
+
+    let layeredHTML = '';
+    for (let i = 0; i <= layerIndex; i++) {
+        layeredHTML += `<div class="mb-2">${i+1}. ${layers[i]}</div>`;
+    }
+
+    document.getElementById('translationPrompt').innerHTML = layeredHTML;
+}
+
+// 显示提示按钮(原有的showHintBtn需移除)，替换为新的控制流程
+document.getElementById('toggleIndependentHint').addEventListener('change', async function() {
+    if (!this.checked) {
+        document.getElementById('promptArea').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('promptArea').style.display = 'block';
+    updateIndependentHint();
+});
+
+// 退出登录功能
+document.getElementById('logoutBtn').addEventListener('click', function() {
+    // 清除本地存储的登录状态
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('username');
+
+    // 更新导航栏显示
+    document.getElementById('loginNav').style.display = 'block';
+    document.getElementById('userNav').style.display = 'none';
+    document.getElementById('logoutNav').style.display = 'none';
+
+    // 重置学习进度区域
+    document.getElementById('progressLoginAlert').style.display = 'none';
+    document.getElementById('completedExercises').textContent = '0';
+    document.getElementById('averageAccuracy').textContent = '0%';
+    document.getElementById('consecutiveDays').textContent = '0';
+    document.getElementById('achievementsArea').innerHTML = '';
+
+    // 重置准确率趋势图
+    const accuracyChartContainer = document.getElementById('accuracyChart');
+    accuracyChartContainer.innerHTML = '<div class="text-center py-5"><p class="text-muted">暂无准确率数据</p></div>';
+
+    // 提示用户退出成功
+    alert('已退出登录。');
+});
+
+// 检查登录状态时更新退出按钮的显示
+function checkLoginStatus() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+    if (isLoggedIn) {
+        const username = localStorage.getItem('username');
+        document.getElementById('loginNav').style.display = 'none';
+        document.getElementById('userNav').style.display = 'block';
+        document.getElementById('logoutNav').style.display = 'block';
+        document.getElementById('username').textContent = username;
+
+        // 加载用户进度
+        loadUserProgress();
+    } else {
+        document.getElementById('loginNav').style.display = 'block';
+        document.getElementById('userNav').style.display = 'none';
+        document.getElementById('logoutNav').style.display = 'none';
+
+        // 未登录时，将所有信息显示为0
+        document.getElementById('progressLoginAlert').style.display = 'none';
+        document.getElementById('completedExercises').textContent = '0';
+        document.getElementById('averageAccuracy').textContent = '0%';
+        document.getElementById('consecutiveDays').textContent = '0';
+
+        // 清空成就列表
+        document.getElementById('achievementsArea').innerHTML = '';
+    }
+}
+
+// 检查登录状态并加载初始句子
+document.addEventListener('DOMContentLoaded', function() {
+    // 检查登录状态
+    checkLoginStatus();
+
+    // 加载第一个句子
+    refreshSentences();
+
+    // 使用 IntersectionObserver 检测元素是否进入视口
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // 监听所有需要动画的元素
+    document.querySelectorAll('.row').forEach(element => {
+        observer.observe(element);
+    });
+});
+
+    // 添加登录/注册页面切换功能
+    document.getElementById('switchToRegister').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('register-tab').click();
+    });
+
+    // 重新翻译按钮
+    document.getElementById('retryBtn').addEventListener('click', function() {
+        // 撤回翻译结果卡片
+        document.getElementById('resultSection').style.display = 'none';
+        // 置空已经输入的翻译文本
+        document.getElementById('translationInput').value = '';
+        // 如果需要，可以在这里添加其他重置操作，比如重置提示区域等
+    });
+
+// 知识点编辑模式变量
+let isEditMode = false;
+
+// 添加自定义句子相关功能
+document.getElementById('saveSentenceBtn').addEventListener('click', async function() {
+    const chineseSentence = document.getElementById('customChineseSentence').value.trim();
+    const difficulty = document.getElementById('sentenceDifficulty').value;
+    const useImmediately = document.getElementById('useImmediately').checked;
+    const errorElement = document.getElementById('sentenceFormError');
+
+    if (!chineseSentence) {
+        errorElement.textContent = '请填写中文句子';
+        errorElement.classList.remove('d-none');
+        return;
+    }
+
+    // 显示加载动画
+    const spinner = document.getElementById('saveSentenceSpinner');
+    spinner.classList.remove('d-none');
+    this.disabled = true;
+
+    try {
+        const response = await sendRequest('/add_custom_sentence', 'POST', {
+            chinese: chineseSentence,
+            difficulty: parseInt(difficulty)
+        });
+
+        if (response.error) {
+            throw new Error(response.error);
+        }
+
+        // 关闭模态框
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addSentenceModal'));
+        modal.hide();
+
+        // 如果选择立即使用，则加载该句子
+        if (useImmediately && response.sentence) {
+            currentSentence = response.sentence;
+            loadSentence(response.sentence);
+        }
+
+        // 显示成功消息
+        alert('句子添加成功' + (useImmediately ? '并已加载' : ''));
+
+        // 重置表单
+        document.getElementById('addSentenceForm').reset();
+
+    } catch (error) {
+        errorElement.textContent = '添加句子失败: ' + error.message;
+        errorElement.classList.remove('d-none');
+    } finally {
+        // 隐藏加载动画
+        spinner.classList.add('d-none');
+        this.disabled = false;
+    }
+});
+
+// 更新知识点编辑按钮函数 - 删除原有函数，改为空函数
+function updateKnowledgeEditButtons() {
+    // 不再需要添加编辑按钮
+}
+
+// 修改知识点编辑模式切换
+document.getElementById('toggleEditMode').addEventListener('click', function() {
+    isEditMode = !isEditMode;
+
+    // 更新按钮文本
+    this.innerHTML = isEditMode ?
+        '<i class="bi bi-x-circle me-1"></i>关闭添加' :
+        '<i class="bi bi-plus-circle me-1"></i>添加模式';
+
+    // 更新按钮样式
+    if (isEditMode) {
+        this.classList.remove('btn-outline-secondary');
+        this.classList.add('btn-outline-success');
+    } else {
+        this.classList.remove('btn-outline-success');
+        this.classList.add('btn-outline-secondary');
+    }
+
+    // 只显示或隐藏添加知识点按钮
+    document.querySelectorAll('.add-knowledge-btn').forEach(btn => {
+        btn.classList.toggle('d-none', !isEditMode);
+    });
+});
+
+// 添加知识点按钮的事件监听器
+document.getElementById('addGrammarBtn').addEventListener('click', () => openAddKnowledgeModal('grammar'));
+document.getElementById('addPhraseBtn').addEventListener('click', () => openAddKnowledgeModal('phrases'));
+document.getElementById('addCollocationBtn').addEventListener('click', () => openAddKnowledgeModal('collocations'));
+document.getElementById('addLayerBtn').addEventListener('click', () => openAddKnowledgeModal('layers'));
+
+
+// 修改 openAddKnowledgeModal 函数
+function openAddKnowledgeModal(type) {
+    const modal = new bootstrap.Modal(document.getElementById('editKnowledgeModal'));
+
+    // 设置模态框标题
+    let typeText = '';
+    switch (type) {
+        case 'grammar': typeText = '语法点'; break;
+        case 'phrases': typeText = '词组'; break;
+        case 'collocations': typeText = '搭配'; break;
+        case 'layers': typeText = '句子层级'; break;
+    }
+
+    document.getElementById('knowledgeModalTitle').textContent = '添加' + typeText;
+
+    // 重置表单数据
+    document.getElementById('editKnowledgeForm').reset();
+    document.getElementById('knowledgeType').value = type;
+    document.getElementById('editMode').value = 'add';
+
+    // 隐藏删除按钮（如果存在）
+    const deleteBtn = document.getElementById('deleteKnowledgeBtn');
+    if (deleteBtn) {
+        deleteBtn.classList.add('d-none');
+    }
+
+    // 显示模态框
+    modal.show();
+}
+
+
+// 修改保存知识点的处理函数
+document.getElementById('saveKnowledgeBtn').addEventListener('click', async function() {
+    const type = document.getElementById('knowledgeType').value;
+    const text = document.getElementById('knowledgeText').value.trim();
+    const explanation = document.getElementById('knowledgeExplanation').value.trim();
+    const example = document.getElementById('knowledgeExample').value.trim();
+    const difficulty = parseInt(document.getElementById('knowledgeDifficulty').value); // 确保转换为数字
+    const errorElement = document.getElementById('knowledgeFormError');
+
+    if (!text || !explanation) {
+        errorElement.textContent = '请填写知识点内容和解释';
+        errorElement.classList.remove('d-none');
+        return;
+    }
+
+    // 显示加载动画
+    const spinner = document.getElementById('saveKnowledgeSpinner');
+    spinner.classList.remove('d-none');
+    this.disabled = true;
+
+    try {
+        const response = await sendRequest('/save_knowledge_point', 'POST', {
+            type: type,
+            text: text,
+            explanation: explanation,
+            example: example,
+            difficulty: difficulty, // 使用转换后的数字
+            mode: 'add'
+        });
+
+        if (response.error) {
+            throw new Error(response.error);
+        }
+
+        // 关闭模态框
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editKnowledgeModal'));
+        modal.hide();
+
+        // 直接将新知识点添加到对应的容器中
+        const newKnowledgeHtml = `
+            <div class="knowledge-tip mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong>${text}</strong>
+                    <span class="badge ${getDifficultyClass(difficulty)}">
+                        ${getDifficultyText(difficulty)}
+                    </span>
+                </div>
+                <p>${explanation}</p>
+                ${example ? `<div class="small fst-italic mt-1">示例: ${example}</div>` : ''}
+            </div>`;
+
+        // 根据类型选择对应的容器
+        let container;
+        switch (type) {
+            case 'grammar':
+                container = document.getElementById('grammarPoints');
+                break;
+            case 'phrases':
+                container = document.getElementById('phrasesPoints');
+                break;
+            case 'collocations':
+                container = document.getElementById('collocationsPoints');
+                break;
+            case 'layers':
+                container = document.getElementById('sentenceLayers');
+                break;
+        }
+
+        // 如果容器中有"暂无数据"的提示，则清除它
+        if (container.querySelector('.text-muted')) {
+            container.innerHTML = '';
+        }
+
+        // 添加新知识点到容器开头
+        container.insertAdjacentHTML('afterbegin', newKnowledgeHtml);
+
+        // 显示成功消息
+        alert('知识点添加成功');
+
+    } catch (error) {
+        errorElement.textContent = '保存知识点失败: ' + error.message;
+        errorElement.classList.remove('d-none');
+    } finally {
+        // 隐藏加载动画
+        spinner.classList.add('d-none');
+        this.disabled = false;
+    }
+});
+
+
+
+// 刷新函数中添加更新编辑按钮
+const originalRefreshSentences = refreshSentences;
+refreshSentences = async function() {
+    await originalRefreshSentences();
+    if (isEditMode) {
+        updateKnowledgeEditButtons();
+    }
+};
+
+// 提交编辑知识点表单时阻止默认提交
+document.getElementById('editKnowledgeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    document.getElementById('saveKnowledgeBtn').click();
+});
+
+// 提交添加句子表单时阻止默认提交
+document.getElementById('addSentenceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    document.getElementById('saveSentenceBtn').click();
+});
+
+// 为displayKnowledgePoints函数添加对编辑模式的支持
+const originalDisplayKnowledgePoints = displayKnowledgePoints;
+displayKnowledgePoints = function(result) {
+    originalDisplayKnowledgePoints(result);
+    if (isEditMode) {
+        updateKnowledgeEditButtons();
+    }
+};
+
+// 页面加载时添加刷新按钮和其他初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+
+    // 添加刷新句子按钮
+    addRefreshButton();
+
+    // 初始化知识点编辑按钮状态
+    updateKnowledgeEditButtons();
+});
+</script>
+</body>
+</html>

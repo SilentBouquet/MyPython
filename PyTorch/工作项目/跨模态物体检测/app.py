@@ -47,11 +47,7 @@ sentence_transformer = SentenceTransformer('all-MiniLM-L6-v2')
 translator_name = 'Helsinki-NLP/opus-mt-zh-en'
 translator_tokenizer = MarianTokenizer.from_pretrained(translator_name)
 translator_model = MarianMTModel.from_pretrained(translator_name)
-vit_gpt2_model = VisionEncoderDecoderModel.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
-feature_extractor = ViTImageProcessor.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
-tokenizer = AutoTokenizer.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-vit_gpt2_model.to(device)
 yolov8_model = YOLO(r"D:\pycharm\python项目\PyTorch\Runs\detect\train\weights\best.pt")
 print("全部加载完成！")
 
@@ -244,7 +240,7 @@ def extract_colors(instance_image):
 # 使用颜色识别和yolo类别识别生成伪图片描述
 def generate_pseudo_description(instance_image, class_id):
     classes = ['person', 'car']
-    # 使用SAM和颜色识别函数检测颜色
+    # 使用颜色识别函数检测颜色
     colors = extract_colors(instance_image)
     color_info = ", ".join(colors.keys()) if colors else "unknown"
 

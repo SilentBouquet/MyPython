@@ -1,9 +1,12 @@
 import gzip
 import time
 import shutil
+import matplotlib
+import requests
 import torch
 import pandas as pd
 from transformers import DistilBertForSequenceClassification, DistilBertTokenizerFast
+import matplotlib.pyplot as plt  # 添加可视化所需的库
 
 # 设置模型参数
 torch.backends.cudnn.deterministic = True
@@ -15,11 +18,9 @@ num_epochs = 3
 url = "https://github.com/rasbt/machine-learning-book/raw/main/ch08/movie_data.csv.gz"
 file_name = "F:/Deep Learning Datasets/movie_data.csv.gz"
 
-'''
 with open(file_name, "wb") as f:
     r = requests.get(url)
     f.write(r.content)
-'''
 
 with gzip.open(file_name, "rb") as f:
     with open("F:/Deep Learning Datasets/movie_data/movie_data.csv", 'wb') as f_out:
@@ -89,10 +90,15 @@ def compute_accuracy(model, data_loader, device):
     return correct_pred.float() / num_examples * 100
 
 
+# 记录训练和验证损失
+train_losses = []
+val_losses = []
+
 # 训练模型
 start_time = time.time()
 for epoch in range(num_epochs):
     model.train()
+    epoch_train_loss = 0.0  # 记录每个 epoch 的训练损失
     for batch_idx, batch in enumerate(train_loader):
         inputs_ids = batch['input_ids'].to(device)
         attention_mask = batch['attention_mask'].to(device)
@@ -102,15 +108,54 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        epoch_train_loss += loss.item()  # 累加训练损失
         if not batch_idx % 250:
-            print(f'Epoch: {epoch + 1:04d}/{num_epochs:04d}'
-                  f'  |  Batch {batch_idx:04d}/{len(train_loader):04d}'
-                  f'  |  Loss: {loss:.4f}')
+            print(
+                f'Epoch: {epoch + 1:04d}/{num_epochs:04d} | Batch {batch_idx:04d}/{len(train_loader):04d} | Loss: {loss:.4f}')
+
+    # 计算平均训练损失
+    avg_train_loss = epoch_train_loss / len(train_loader)
+    train_losses.append(avg_train_loss)
+
+    # 验证阶段
     model.eval()
+    epoch_val_loss = 0.0  # 记录每个 epoch 的验证损失
     with torch.set_grad_enabled(False):
-        print(f'Training Accuracy: {compute_accuracy(model, train_loader, device):.2f}%'
-              f'\nVal Accuracy: {compute_accuracy(model, val_loader, device):.2f}%')
+        for batch in val_loader:
+            inputs_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
+            labels = batch['labels'].to(device)
+            outputs = model(input_ids=inputs_ids, attention_mask=attention_mask, labels=labels)
+            loss = outputs['loss']
+            epoch_val_loss += loss.item()  # 累加验证损失
+
+    # 计算平均验证损失
+    avg_val_loss = epoch_val_loss / len(val_loader)
+    val_losses.append(avg_val_loss)
+
+    # 打印训练和验证的准确率
+    print(
+        f'Epoch {epoch + 1} | Training Accuracy: {compute_accuracy(model, train_loader, device):.2f}%'
+        f' | Val Accuracy: {compute_accuracy(model, val_loader, device):.2f}%')
+    print(f'Training Loss: {avg_train_loss:.4f} | Validation Loss: {avg_val_loss:.4f}')
     print(f'Time elapsed: {(time.time() - start_time) / 60:.2f} min')
 
 print(f'Total Training Time: {(time.time() - start_time) / 60:.2f} min')
 print(f'Test Accuracy: {compute_accuracy(model, test_loader, device):.2f}%')
+
+# 绘制学习曲线
+matplotlib.use('Qt5Agg')
+plt.figure(figsize=(10, 6))
+plt.plot(train_losses, label='Training Loss')
+plt.plot(val_losses, label='Validation Loss')
+plt.title('Learning Curve')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# 保存模型
+model_path = "../Runs/"
+torch.save(model.state_dict(), model_path)
+print(f"Model saved to {model_path}")

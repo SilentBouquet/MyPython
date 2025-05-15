@@ -141,8 +141,7 @@ print(df_test.sort_values(by="loss", ascending=False).head(10))
 print(df_test.sort_values(by="loss", ascending=True).head(10))
 
 # 存储与共享模型
-trainer.push_to_hub(commit_message="Training completed!",
-                    token="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")
+trainer.push_to_hub(commit_message="Training completed!")
 
 # 使用微调模型对新推文进行预测
 model_id = f"SilentBouquet/{model_ckpt}"

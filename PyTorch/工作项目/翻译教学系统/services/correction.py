@@ -1,16 +1,8 @@
-import nltk
 import requests
 import json
-import os
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 from nltk.tokenize import word_tokenize
 from config import CONFIG
-
-# 确保下载必要的NLTK资源
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
 
 
 class DeepSeekAPI:

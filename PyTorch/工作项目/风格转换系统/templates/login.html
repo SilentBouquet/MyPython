@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 艺术风格转换系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-illustration">
+            <div class="illustration-content">
+                <img src="{{ url_for('static', filename='images/login-illustration.svg') }}" alt="艺术风格插画">
+                <h2>将您的照片转换为艺术品</h2>
+                <p>Transform Your Images into Art</p>
+            </div>
+        </div>
+
+        <div class="auth-form-container">
+            <div class="auth-form">
+                <h1>登录</h1>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('login') }}" id="login-form">
+                    <div class="form-group">
+                        <label for="email">电子邮箱</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        <div class="error-message" id="password-error"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">登录</button>
+                    </div>
+                </form>
+
+                <div class="auth-links">
+                    <a href="#">忘记密码?</a>
+                    <span class="divider">|</span>
+                    <a href="{{ url_for('register') }}">注册账号</a>
+                </div>
+
+                <div class="auth-info">
+                    <p>测试账号: user@example.com</p>
+                    <p>测试密码: password123</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('login-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const emailError = document.getElementById('email-error');
+        const passwordError = document.getElementById('password-error');
+
+        // 邮箱格式验证
+        emailInput.addEventListener('input', function() {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(this.value) && this.value.length > 0) {
+                emailError.textContent = '请输入有效的电子邮箱地址';
+            } else {
+                emailError.textContent = '';
+            }
+        });
+
+        // 密码长度验证
+        passwordInput.addEventListener('input', function() {
+            if (this.value.length > 0 && this.value.length < 8) {
+                passwordError.textContent = '密码长度至少为8个字符';
+            } else {
+                passwordError.textContent = '';
+            }
+        });
+
+        // 表单提交验证
+        loginForm.addEventListener('submit', function(e) {
+            let isValid = true;
+
+            // 邮箱验证
+            if (emailInput.value.trim() === '') {
+                emailError.textContent = '请输入您的电子邮箱';
+                isValid = false;
+            }
+
+            // 密码验证
+            if (passwordInput.value.trim() === '') {
+                passwordError.textContent = '请输入您的密码';
+                isValid = false;
+            } else if (passwordInput.value.length < 8) {
+                passwordError.textContent = '密码长度至少为8个字符';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    });
+    </script>
+</body>
+</html>

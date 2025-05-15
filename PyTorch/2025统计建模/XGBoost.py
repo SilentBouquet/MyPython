@@ -40,7 +40,7 @@ model = XGBClassifier(
 
 # 训练模型
 eval_set = [(X_test_scaled, y_test)]
-model.fit( X_train_scaled, y_train_resampled, eval_set=eval_set, verbose=True )
+model.fit(X_train_scaled, y_train_resampled, eval_set=eval_set, verbose=True)
 
 # 绘制学习曲线
 matplotlib.use('Qt5Agg')

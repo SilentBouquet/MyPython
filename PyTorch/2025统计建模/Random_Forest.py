@@ -1,44 +1,42 @@
 import joblib
 import pandas as pd
-import numpy as np
-from imblearn.combine import SMOTEENN
-from sklearn.model_selection import train_test_split, GridSearchCV
+from imblearn.over_sampling import SMOTE
 from sklearn.ensemble import RandomForestClassifier
-from imblearn.metrics import classification_report_imbalanced
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import f1_score, roc_auc_score, precision_recall_curve, classification_report
+from sklearn.preprocessing import StandardScaler
 
 # 加载数据
-file_path = 'balanced_transactions.xlsx'
-data = pd.read_excel(file_path)
+file_path = 'creditcard.csv'
+data = pd.read_csv(file_path)
 
 # 特征和标签
-X = data.drop(columns=['是否欺诈'])
-y = data['是否欺诈']
-# 确保所有特征都是数值型
-for col in X.columns:
-    if X[col].dtype == 'object':
-        X[col] = X[col].astype(str).astype('category').cat.codes
+X = data.drop(columns=['Class'])
+y = data['Class']
 
 # 划分训练集和测试集
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
-# 使用GridSearchCV进行参数调优
-param_grid = {
-    'n_estimators': [100, 200, 300],  # 树的数量
-    'max_depth': [None, 10, 20],      # 树的最大深度
-    'min_samples_split': [2, 5, 10],  # 每个节点分裂所需的最小样本数
-    'class_weight': ['balanced']      # 自动调整类别权重
-}
+# 使用SMOTE处理类别不平衡
+smote = SMOTE(random_state=42)
+X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
 
-model = RandomForestClassifier(random_state=42)
-grid_search = GridSearchCV(model, param_grid, cv=3, scoring='f1', n_jobs=-1)
-grid_search.fit(X_train, y_train)
+# 标准化特征
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train_resampled)
+X_test_scaled = scaler.transform(X_test)
 
-# 获取最佳模型
-best_model = grid_search.best_estimator_
+model = RandomForestClassifier(
+    random_state=42,
+    n_estimators=300,
+    max_depth=20,
+    min_samples_split=10,
+    class_weight='balanced'
+)
+model.fit(X_train_scaled, y_train_resampled)
 
 # 预测
-y_pred = best_model.predict(X_test)
+y_pred = model.predict(X_test_scaled)
 
 # 评估
 print("Classification Report:")
@@ -52,4 +50,4 @@ print(f"Precision: {precision}")
 print(f"Recall: {recall}")
 
 # 保存模型
-joblib.dump(best_model, 'RandomForestClassifier_model.pkl')
+joblib.dump(model, 'RandomForestClassifier_model.pkl')

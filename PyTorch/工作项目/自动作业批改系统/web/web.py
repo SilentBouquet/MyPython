@@ -4,7 +4,7 @@ import cv2
 import jieba
 import torch
 from PIL import Image
-from cnocr import CnOcr
+from paddleocr import PaddleOCR
 from ultralytics import YOLO
 import language_tool_python
 from snownlp import SnowNLP
@@ -19,7 +19,7 @@ app = Flask(__name__)
 # 初始化模型
 trocr_processor = TrOCRProcessor.from_pretrained('microsoft/trocr-base-handwritten', use_fast=True)
 trocr_model = VisionEncoderDecoderModel.from_pretrained('microsoft/trocr-base-handwritten').to("cuda")  # 使用 GPU
-cnocr_model = CnOcr(rec_model_name='densenet_lite_136-gru')  # 使用 CNOCR 模型
+paddleocr_model = PaddleOCR(use_angle_cls=True, lang="ch")  # 使用 PaddleOCR
 xuanze_model = YOLO(r"D:\pycharm\python项目\PyTorch\Runs\xuanze\train\weights\best.pt")
 jieda_model = YOLO(r"D:\pycharm\python项目\PyTorch\Runs\jieda\train\weights\best.pt")
 tiankong_model = YOLO(r"D:\pycharm\python项目\PyTorch\Runs\tiankong\train\weights\best.pt")
@@ -149,10 +149,10 @@ def grade_math_physics_answer(student_answer, reference_answer, total_score):
 
 
 # 增加快速OCR处理
-def extract_text(img, ocr_model):
+def extract_text_paddleocr(img, ocr_model):
     img_pil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    result = ocr_model.ocr(img_pil)
-    extracted_text = ''.join([item['text'] for item in result])
+    result = ocr_model.ocr(img_pil, cls=True)
+    extracted_text = ''.join([line[1][0] for line in result[0]])
     extracted_text = re.sub(r'[^\w\s]', '', extracted_text)  # 移除所有标点
     return extracted_text
 
@@ -254,7 +254,7 @@ def calculate_score():
         split_answer = SplitAnswer(tiankong_model)
         cls, cropped_image_list = split_answer.crop_answers(file_path)
         for img in cropped_image_list:
-            extracted_text = extract_text(img, cnocr_model)
+            extracted_text = extract_text_paddleocr(img, paddleocr_model)  # 使用 PaddleOCR
             if extracted_text:
                 student_answer += extracted_text + '\n'
         if not student_answer:
@@ -271,7 +271,7 @@ def calculate_score():
         split_answer = SplitAnswer(jieda_model)
         cls, cropped_image_list = split_answer.crop_answers(file_path)
         for img in cropped_image_list:
-            extracted_text = extract_text(img, cnocr_model)
+            extracted_text = extract_text_paddleocr(img, paddleocr_model)  # 使用 PaddleOCR
             if extracted_text:
                 student_answer += extracted_text + '\n'
         if not student_answer:
@@ -281,7 +281,7 @@ def calculate_score():
         result += f"得分：{score}/{total_score}\n参考建议：{suggestion}"
     elif question_type == "作文题":
         img = cv2.imread(file_path)
-        extracted_text = extract_text(img, cnocr_model)
+        extracted_text = extract_text_paddleocr(img, paddleocr_model)  # 使用 PaddleOCR
         student_answer += extracted_text
         if not student_answer:
             return jsonify({'error': '未识别到学生答案'})
@@ -300,16 +300,11 @@ def calculate_score():
         result += f"总分：{score:.2f}"
 
     # 保存处理后的图片路径
-    processed_image_path = 'D:/pycharm/python项目/PyTorch/工作项目/自动作业批改系统/web/static/results/'
-    filename = 'processed_' + os.path.basename(file_path)
-    processed_image_path += filename
-
-    # 将得分添加到图片上
+    processed_image_path = 'D:/pycharm/python项目/PyTorch/工作项目/自动作业批改系统/web/static/results/processed_' + os.path.basename(file_path)
     add_text_to_image(file_path, f"{score}", processed_image_path)
-    print(processed_image_path)
 
     # 返回结果和图片
-    return jsonify({'result': result, 'image_path': '/static/results/' + filename})
+    return jsonify({'result': result, 'image_path': '/static/results/processed_' + os.path.basename(file_path)})
 
 
 if __name__ == '__main__':

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史记录 - 艺术风格转换系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- 添加图表库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <h1>艺术风格转换</h1>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{{ url_for('index') }}">首页</a></li>
+                    <li><a href="{{ url_for('history') }}" class="active">历史记录</a></li>
+                </ul>
+            </nav>
+            <div class="user-menu">
+                <div class="user-avatar" id="user-avatar">
+                    <i class="fas fa-user"></i>
+                    <span class="user-name">{{ current_user.name }}</span>
+                </div>
+                <div class="user-dropdown" id="user-dropdown">
+                    <ul>
+                        <li><a href="#"><i class="fas fa-user-circle"></i> 个人中心</a></li>
+                        <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> 退出</a></li>
+                    </ul>
+                </div>
+            </div>
+            <button class="mobile-menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="history-container">
+        <div class="container">
+            <!-- 统计信息区域 -->
+            <div class="stats-section">
+                <h2>使用统计</h2>
+                <div class="stats-container">
+                    <div class="stats-overview">
+                        <div class="stat-card">
+                            <div class="stat-value">{{ stats.total_records }}</div>
+                            <div class="stat-label">总转换次数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ stats.styles.charcoal }}</div>
+                            <div class="stat-label">素描风格</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ stats.styles.watercolor }}</div>
+                            <div class="stat-label">水彩风格</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ stats.styles.impression }}</div>
+                            <div class="stat-label">印象派风格</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-header">
+                <h2>历史转换记录</h2>
+                <div class="history-filters">
+                    <div class="filter-group">
+                        <label for="style-filter">风格筛选:</label>
+                        <select id="style-filter">
+                            <option value="all">所有风格</option>
+                            <option value="charcoal">素描风格</option>
+                            <option value="watercolor">水彩风格</option>
+                            <option value="impression">印象派风格</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="date-sort">日期排序:</label>
+                        <select id="date-sort">
+                            <option value="newest">最新优先</option>
+                            <option value="oldest">最早优先</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-grid" id="history-grid">
+                <!-- 历史记录将通过JavaScript加载 -->
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>加载历史记录中...</p>
+                </div>
+            </div>
+
+            <div class="empty-history" id="empty-history" style="display: none;">
+                <div class="empty-illustration">
+                    <i class="fas fa-history"></i>
+                </div>
+                <h3>暂无历史记录</h3>
+                <p>转换图片后，您的记录将显示在这里</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">开始转换</a>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-message">操作成功!</div>
+    </div>
+
+    <!-- 图片预览模态框 -->
+    <div class="image-modal" id="image-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-title">图片预览</h3>
+                <button id="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="modal-image" src="" alt="预览图片">
+            </div>
+            <div class="modal-footer">
+                <button id="modal-download" class="btn btn-success">
+                    <i class="fas fa-download"></i> 下载
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2023 艺术风格转换系统. 保留所有权利.</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 用户下拉菜单
+        const userAvatar = document.getElementById('user-avatar');
+        const userDropdown = document.getElementById('user-dropdown');
+
+        if (userAvatar) {
+            userAvatar.onclick = function(e) {
+                userDropdown.classList.toggle('active');
+            };
+        }
+
+        // 加载历史记录
+        const historyGrid = document.getElementById('history-grid');
+        const emptyHistory = document.getElementById('empty-history');
+        const styleFilter = document.getElementById('style-filter');
+        const dateSort = document.getElementById('date-sort');
+
+        let historyData = [];
+
+        function fetchHistory() {
+            fetch('/api/history')
+                .then(response => response.json())
+                .then(data => {
+                    historyData = data;
+
+                    if (historyData.length === 0) {
+                        historyGrid.innerHTML = '';
+                        emptyHistory.style.display = 'flex';
+                    } else {
+                        emptyHistory.style.display = 'none';
+                        renderHistory(historyData);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching history:', error);
+                    historyGrid.innerHTML = `
+                        <div class="error-message" style="grid-column: 1/-1; text-align: center; padding: 30px;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: var(--danger-color); margin-bottom: 15px;"></i>
+                            <p>获取历史记录失败，请刷新页面重试</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // 渲染历史记录
+        function renderHistory(data) {
+            historyGrid.innerHTML = '';
+
+            if (data.length === 0) {
+                historyGrid.innerHTML = `
+                    <div class="no-results" style="grid-column: 1/-1; text-align: center; padding: 30px;">
+                        <p>没有符合条件的记录</p>
+                    </div>
+                `;
+                return;
+            }
+
+            data.forEach(item => {
+                let styleText = '';
+                let styleClass = '';
+
+                if (item.style === 'charcoal') {
+                    styleText = '素描风格';
+                    styleClass = 'charcoal';
+                } else if (item.style === 'watercolor') {
+                    styleText = '水彩风格';
+                    styleClass = 'watercolor';
+                } else if (item.style === 'impression') {
+                    styleText = '印象派风格';
+                    styleClass = 'impression';
+                }
+
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.dataset.id = item.id;
+                historyItem.dataset.style = item.style;
+
+                historyItem.innerHTML = `
+                    <div class="history-item-header">
+                        <div class="history-date">${item.date}</div>
+                        <div class="history-style ${styleClass}">${styleText}</div>
+                    </div>
+                    <div class="history-images">
+                        <div class="history-image">
+                            <img src="${item.original}" alt="原始图片" data-src="${item.original}" data-type="original">
+                            <div class="image-label">原始图片</div>
+                        </div>
+                        <div class="history-image">
+                            <img src="${item.result}" alt="转换结果" data-src="${item.result}" data-type="result">
+                            <div class="image-label">转换结果</div>
+                        </div>
+                    </div>
+                    <div class="history-actions">
+                        <button class="download-action" data-url="${item.result}">
+                            <i class="fas fa-download"></i> 下载
+                        </button>
+                        <button class="delete-action" data-id="${item.id}">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                `;
+
+                historyGrid.appendChild(historyItem);
+            });
+
+            // 添加下载和删除事件
+            document.querySelectorAll('.download-action').forEach(button => {
+                button.onclick = function() {
+                    const url = this.dataset.url;
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = url.split('/').pop();
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showToast('图片下载中...', 'info');
+                };
+            });
+
+            document.querySelectorAll('.delete-action').forEach(button => {
+                button.onclick = function() {
+                    const id = this.dataset.id;
+
+                    if (confirm('确定要删除这条记录吗？')) {
+                        fetch(`/api/history/${id}`, {
+                            method: 'DELETE'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const item = document.querySelector(`.history-item[data-id="${id}"]`);
+                                item.style.animation = 'fadeOut 0.3s forwards';
+
+                                setTimeout(() => {
+                                    item.remove();
+                                    fetchHistory(); // 重新加载数据以更新统计
+                                    showToast('记录已删除', 'success');
+                                }, 300);
+                            } else {
+                                showToast('删除失败，请重试', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showToast('删除过程发生错误', 'error');
+                        });
+                    }
+                };
+            });
+
+            // 图片预览
+            document.querySelectorAll('.history-image img').forEach(img => {
+                img.onclick = function() {
+                    const src = this.dataset.src;
+                    const type = this.dataset.type;
+                    const modalImage = document.getElementById('modal-image');
+                    const modalTitle = document.getElementById('modal-title');
+                    const modalDownload = document.getElementById('modal-download');
+                    const imageModal = document.getElementById('image-modal');
+
+                    modalImage.src = src;
+                    modalTitle.textContent = type === 'original' ? '原始图片' : '转换结果';
+                    modalDownload.onclick = function() {
+                        const link = document.createElement('a');
+                        link.href = src;
+                        link.download = src.split('/').pop();
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    };
+
+                    imageModal.classList.add('active');
+                };
+            });
+        }
+
+        // 显示通知
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = toast.querySelector('.toast-icon i');
+            const toastMessage = toast.querySelector('.toast-message');
+
+            toastMessage.textContent = message;
+
+            if (type === 'success') {
+                toastIcon.className = 'fas fa-check-circle';
+                toastIcon.style.color = 'var(--success-color)';
+            } else if (type === 'error') {
+                toastIcon.className = 'fas fa-exclamation-circle';
+                toastIcon.style.color = 'var(--danger-color)';
+            } else if (type === 'info') {
+                toastIcon.className = 'fas fa-info-circle';
+                toastIcon.style.color = 'var(--accent-blue)';
+            }
+
+            toast.classList.add('active');
+
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // 关闭图片预览
+        const closeModal = document.getElementById('close-modal');
+        const imageModal = document.getElementById('image-modal');
+
+        if (closeModal && imageModal) {
+            closeModal.onclick = function() {
+                imageModal.classList.remove('active');
+            };
+
+            document.querySelector('.modal-overlay').onclick = function() {
+                imageModal.classList.remove('active');
+            };
+        }
+
+        // 筛选和排序
+        if (styleFilter && dateSort) {
+            styleFilter.onchange = filterAndSortHistory;
+            dateSort.onchange = filterAndSortHistory;
+        }
+
+        function filterAndSortHistory() {
+            const style = styleFilter.value;
+            const sort = dateSort.value;
+
+            let filteredData = [...historyData];
+
+            // 应用风格筛选
+            if (style !== 'all') {
+                filteredData = filteredData.filter(item => item.style === style);
+            }
+
+            // 应用日期排序
+            filteredData.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+
+                if (sort === 'newest') {
+                    return dateB - dateA;
+                } else {
+                    return dateA - dateB;
+                }
+            });
+
+            renderHistory(filteredData);
+        }
+
+        // 初始化
+        fetchHistory();
+    });
+    </script>
+</body>
+</html>

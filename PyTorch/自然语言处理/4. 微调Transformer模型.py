@@ -10,8 +10,6 @@ from transformers import AutoModelForSequenceClassification
 from transformers import Trainer, TrainingArguments, AutoTokenizer, pipeline
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
 
-login(token="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")
-
 num_labels = 6
 model_ckpt = "distilbert-base-uncased"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -49,8 +49,6 @@ class DeepSeekTranslator:
             print(f"DeepSeek翻译请求异常: {str(e)}")
             return ""
 
-
-
     def _fallback_get_initial_letters(self, english_text: str, word_count: int = 0) -> str:
         """API调用失败时的备用方法"""
         words = english_text.split()

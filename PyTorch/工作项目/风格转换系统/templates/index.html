@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>艺术风格转换系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <h1>艺术风格转换</h1>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{{ url_for('index') }}" class="active">首页</a></li>
+                    <li><a href="{{ url_for('history') }}">历史记录</a></li>
+                </ul>
+            </nav>
+            <div class="user-menu">
+                <div class="user-avatar" id="user-avatar">
+                    <i class="fas fa-user"></i>
+                    <span class="user-name">{{ current_user.name }}</span>
+                </div>
+                <div class="user-dropdown" id="user-dropdown">
+                    <ul>
+                        <li><a href="#"><i class="fas fa-user-circle"></i> 个人信息</a></li>
+                        <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> 退出</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 添加英雄区域 -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1>将您的照片转换为独特艺术作品</h1>
+                <p>使用我们先进的AI模型，一键将普通照片变成令人惊叹的艺术杰作</p>
+                <div class="hero-features">
+                    <div class="feature">
+                        <i class="fas fa-magic"></i>
+                        <span>多种艺术风格</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-bolt"></i>
+                        <span>快速处理</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-download"></i>
+                        <span>高质量输出</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="image-container">
+                    <div class="image-box original">
+                        <img src="{{ url_for('static', filename='images/example-original.jpg') }}" alt="原始照片示例">
+                    </div>
+                    <div class="image-box transformed">
+                        <img src="{{ url_for('static', filename='images/example-transformed.jpg') }}" alt="转换后示例">
+                    </div>
+                </div>
+                <div class="arrow-icon">
+                    <i class="fas fa-long-arrow-alt-right"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 添加步骤指导 -->
+    <section class="steps-section">
+        <div class="container">
+            <h2 class="section-title">如何使用 <span class="text-accent">三步完成转换</span></h2>
+            <div class="steps-container">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h3>上传照片</h3>
+                    <p>选择您想要转换的图片（JPG或PNG格式，不超过5MB）</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">
+                        <i class="fas fa-paint-brush"></i>
+                    </div>
+                    <h3>选择风格</h3>
+                    <p>从素描、水彩或印象派风格中选择您喜欢的艺术风格</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>完成转换</h3>
+                    <p>点击转换按钮，几秒钟后即可下载或分享您的艺术作品</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="app-container">
+        <div class="container">
+            <h2 class="section-title">开始创作 <span class="text-accent">您的艺术作品</span></h2>
+            <div class="conversion-panel">
+                <div class="upload-section panel-card" id="upload-section">
+                    <div class="panel-header">
+                        <div class="panel-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h2>图片上传</h2>
+                    </div>
+                    <div class="panel-body">
+                        <form id="upload-form" enctype="multipart/form-data">
+                            <div class="dropzone" id="dropzone">
+                                <input type="file" id="image-upload" name="file" accept=".jpg,.jpeg,.png">
+                                <div class="dropzone-content" id="dropzone-content">
+                                    <img src="{{ url_for('static', filename='images/upload-placeholder.svg') }}" alt="上传图标" class="upload-icon">
+                                    <p>点击或拖拽图片至此处</p>
+                                    <span>支持JPG、PNG格式，文件大小≤5MB</span>
+                                </div>
+                                <div class="preview-container" id="preview-container" style="display: none;">
+                                    <img id="preview-image" src="" alt="预览图片">
+                                    <button type="button" class="remove-image" id="remove-image">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="style-section panel-card" id="style-section">
+                    <div class="panel-header">
+                        <div class="panel-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <h2>选择风格</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="style-cards">
+                            <div class="style-card" data-style="charcoal">
+                                <div class="style-icon">
+                                    <img src="{{ url_for('static', filename='images/charcoal-icon.svg') }}" alt="素描风格">
+                                </div>
+                                <div class="style-info">
+                                    <h3>素描风格</h3>
+                                    <p>将您的照片转换为精美的素描作品</p>
+                                </div>
+                            </div>
+
+                            <div class="style-card" data-style="watercolor">
+                                <div class="style-icon">
+                                    <img src="{{ url_for('static', filename='images/watercolor-icon.svg') }}" alt="水彩风格">
+                                </div>
+                                <div class="style-info">
+                                    <h3>水彩风格</h3>
+                                    <p>为照片添加水彩画般的柔和艺术效果</p>
+                                </div>
+                            </div>
+
+                            <div class="style-card" data-style="impression">
+                                <div class="style-icon">
+                                    <img src="{{ url_for('static', filename='images/impression-icon.svg') }}" alt="印象派风格">
+                                </div>
+                                <div class="style-info">
+                                    <h3>印象派风格</h3>
+                                    <p>体验莫奈、梵高等印象派大师的绘画风格</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="conversion-action">
+                            <button id="convert-btn" class="btn btn-primary" disabled>
+                                <i class="fas fa-magic"></i> 开始转换
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-section panel-card" id="result-section">
+                    <div class="panel-header">
+                        <div class="panel-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <h2>转换结果</h2>
+                    </div>
+                    <div class="panel-body">
+                        <!-- 先显示结果区域 -->
+                        <div class="result-placeholder" id="result-placeholder">
+                            <img src="{{ url_for('static', filename='images/result-placeholder.svg') }}" alt="结果占位图">
+                        </div>
+                        <div class="result-display" id="result-display" style="display: none;">
+                            <img id="result-image" src="" alt="转换结果">
+                            <div class="result-actions">
+                                <button id="download-btn" class="btn btn-success">
+                                    <i class="fas fa-download"></i> 下载
+                                </button>
+                                <button id="share-btn" class="btn btn-info">
+                                    <i class="fas fa-share-alt"></i> 分享
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="processing-overlay" id="processing-overlay">
+            <div class="processing-content">
+                <div class="processing-animation">
+                    <div class="brush-stroke"></div>
+                    <div class="brush-stroke"></div>
+                    <div class="brush-stroke"></div>
+                </div>
+                <h3 id="processing-message">正在转换...</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 添加特色说明区 -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">我们的特色 <span class="text-accent">为什么选择我们</span></h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>先进AI模型</h3>
+                    <p>我们使用最新的深度学习技术，确保转换效果逼真自然</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3>高速处理</h3>
+                    <p>强大的服务器确保您的图片在几秒钟内完成风格转换</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>安全可靠</h3>
+                    <p>我们重视您的隐私，所有上传的图片都受到严格保护</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h3>历史记录</h3>
+                    <p>所有转换记录都会保存，方便您随时查看和下载</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-message">操作成功!</div>
+    </div>
+
+    <div class="help-modal" id="help-modal">
+        <div class="help-content">
+            <div class="help-header">
+                <h2>使用帮助</h2>
+                <button id="close-help">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="help-body">
+                <div class="help-section">
+                    <h3>如何使用风格转换系统?</h3>
+                    <ol>
+                        <li>上传一张您想要转换的图片 (JPG或PNG格式)</li>
+                        <li>从三种风格中选择一种: 素描、水彩或印象派</li>
+                        <li>点击"开始转换"按钮</li>
+                        <li>等待几秒钟处理完成</li>
+                        <li>下载或分享您的艺术作品</li>
+                    </ol>
+                </div>
+                <div class="help-section">
+                    <h3>常见问题</h3>
+                    <div class="faq-item">
+                        <div class="faq-question">转换需要多长时间?</div>
+                        <div class="faq-answer">通常只需几秒钟，具体取决于图片大小和服务器负载。</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">是否保存我的原始图片?</div>
+                        <div class="faq-answer">是的，我们会暂时保存您的原始图片和转换结果，方便您在历史记录中查看。</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">支持多大的图片?</div>
+                        <div class="faq-answer">目前支持最大5MB的图片文件。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h2>艺术风格转换系统</h2>
+                    <p>将您的照片变成艺术杰作</p>
+                </div>
+                <div class="footer-links">
+                    <h3>快速链接</h3>
+                    <ul>
+                        <li><a href="{{ url_for('index') }}">首页</a></li>
+                        <li><a href="{{ url_for('history') }}">历史记录</a></li>
+                        <li><a href="#" id="footer-help-link">使用帮助</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h3>联系我们</h3>
+                    <p><i class="fas fa-envelope"></i> support@styletransfer.com</p>
+                    <p><i class="fas fa-phone"></i> +86 123 4567 8901</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 艺术风格转换系统. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 保持原有JavaScript代码不变 -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 用户头像下拉菜单
+        const userAvatar = document.getElementById('user-avatar');
+        const userDropdown = document.getElementById('user-dropdown');
+
+        if (userAvatar) {
+            userAvatar.onclick = function(e) {
+                userDropdown.classList.toggle('active');
+            };
+
+            document.addEventListener('click', function(e) {
+                if (!userAvatar.contains(e.target) && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+        }
+
+        // 帮助模态框
+        const helpLink = document.getElementById('help-link');
+        const footerHelpLink = document.getElementById('footer-help-link');
+        const helpModal = document.getElementById('help-modal');
+        const closeHelp = document.getElementById('close-help');
+
+        function openHelpModal(e) {
+            e.preventDefault();
+            helpModal.classList.add('active');
+        }
+
+        if (helpLink && helpModal) {
+            helpLink.onclick = openHelpModal;
+        }
+
+        if (footerHelpLink && helpModal) {
+            footerHelpLink.onclick = openHelpModal;
+        }
+
+        if (closeHelp) {
+            closeHelp.onclick = function() {
+                helpModal.classList.remove('active');
+            };
+        }
+
+        helpModal.addEventListener('click', function(e) {
+            if (e.target === helpModal) {
+                helpModal.classList.remove('active');
+            }
+        });
+
+        // 文件上传处理
+        const dropzone = document.getElementById('dropzone');
+        const imageUpload = document.getElementById('image-upload');
+        const dropzoneContent = document.getElementById('dropzone-content');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const removeImage = document.getElementById('remove-image');
+        const convertBtn = document.getElementById('convert-btn');
+
+        if (dropzone) {
+            dropzone.onclick = function(e) {
+                if (!e.target.closest('.remove-image') && imageUpload) {
+                    imageUpload.click();
+                }
+            };
+
+            // 拖放功能
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, function() {
+                    dropzone.classList.add('active');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, function() {
+                    dropzone.classList.remove('active');
+                });
+            });
+
+            dropzone.addEventListener('drop', function(e) {
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    imageUpload.files = files;
+                    handleFileSelect();
+                }
+            });
+        }
+
+        if (imageUpload) {
+            imageUpload.onchange = handleFileSelect;
+        }
+
+        function handleFileSelect() {
+            if (imageUpload.files && imageUpload.files.length) {
+                const file = imageUpload.files[0];
+
+                // 验证文件类型
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!validTypes.includes(file.type)) {
+                    showToast('请上传JPG或PNG格式的图片', 'error');
+                    return;
+                }
+
+                // 验证文件大小
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('图片大小不能超过5MB', 'error');
+                    return;
+                }
+
+                // 预览图片
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    dropzoneContent.style.display = 'none';
+                    previewContainer.style.display = 'flex';
+
+                    // 自动选择第一个风格
+                    const styleCards = document.querySelectorAll('.style-card');
+                    if (styleCards.length > 0 && !document.querySelector('.style-card.selected')) {
+                        styleCards[0].classList.add('selected');
+                    }
+
+                    // 激活转换按钮
+                    convertBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 删除预览图片
+        if (removeImage) {
+            removeImage.onclick = function(e) {
+                e.stopPropagation();
+                imageUpload.value = '';
+                previewContainer.style.display = 'none';
+                dropzoneContent.style.display = 'block';
+                convertBtn.disabled = true;
+            };
+        }
+
+        // 风格选择
+        const styleCards = document.querySelectorAll('.style-card');
+        if (styleCards.length > 0) {
+            styleCards.forEach(card => {
+                card.onclick = function() {
+                    styleCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                };
+            });
+        }
+
+        // 显示通知
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = toast.querySelector('.toast-icon i');
+            const toastMessage = toast.querySelector('.toast-message');
+
+            toastMessage.textContent = message;
+
+            if (type === 'success') {
+                toastIcon.className = 'fas fa-check-circle';
+                toastIcon.style.color = 'var(--success-color)';
+            } else if (type === 'error') {
+                toastIcon.className = 'fas fa-exclamation-circle';
+                toastIcon.style.color = 'var(--danger-color)';
+            } else if (type === 'info') {
+                toastIcon.className = 'fas fa-info-circle';
+                toastIcon.style.color = 'var(--accent-blue)';
+            }
+
+            toast.classList.add('active');
+
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // 转换图片
+        if (convertBtn) {
+            convertBtn.onclick = function() {
+                if (!imageUpload.files || imageUpload.files.length === 0) {
+                    showToast('请先上传图片', 'error');
+                    return;
+                }
+
+                const selectedStyle = document.querySelector('.style-card.selected');
+                if (!selectedStyle) {
+                    showToast('请选择一种风格', 'error');
+                    return;
+                }
+
+                const style = selectedStyle.dataset.style;
+
+                // 创建FormData
+                const formData = new FormData();
+                formData.append('file', imageUpload.files[0]);
+                formData.append('style', style);
+
+                // 显示处理中状态
+                const processingOverlay = document.getElementById('processing-overlay');
+                const processingMessage = document.getElementById('processing-message');
+                const progressFill = document.getElementById('progress-fill');
+
+                processingOverlay.classList.add('active');
+
+                let messages = {
+                    'charcoal': '正在创建素描风格...',
+                    'watercolor': '正在绘制水彩效果...',
+                    'impression': '正在以印象派风格创作...'
+                };
+
+                processingMessage.textContent = messages[style];
+
+                // 模拟进度条
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    if (progress >= 90) {
+                        clearInterval(progressInterval);
+                    } else {
+                        progress += 5;
+                        progressFill.style.width = `${progress}%`;
+                    }
+                }, 300);
+
+                // 发送请求
+                fetch('/convert', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('转换失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    clearInterval(progressInterval);
+                    progressFill.style.width = '100%';
+
+                    setTimeout(() => {
+                        processingOverlay.classList.remove('active');
+                        progressFill.style.width = '0';
+
+                        if (data.success) {
+                            // 显示结果
+                            const resultImage = document.getElementById('result-image');
+                            const resultPlaceholder = document.getElementById('result-placeholder');
+                            const resultDisplay = document.getElementById('result-display');
+
+                            resultImage.src = data.result_url;
+                            resultPlaceholder.style.display = 'none';
+                            resultDisplay.style.display = 'block';
+
+                            // 设置下载按钮
+                            const downloadBtn = document.getElementById('download-btn');
+                            downloadBtn.onclick = function() {
+                                const link = document.createElement('a');
+                                link.href = data.result_url;
+                                link.download = `${style}_result.jpg`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            };
+
+                            // 设置分享按钮
+                            const shareBtn = document.getElementById('share-btn');
+                            shareBtn.onclick = function() {
+                                if (navigator.share) {
+                                    navigator.share({
+                                        title: '我的艺术风格转换',
+                                        text: `查看我用${messages[style].replace('正在', '').replace('...', '')}转换的图片！`,
+                                        url: window.location.origin + data.result_url
+                                    })
+                                    .catch(error => {
+                                        console.log('分享失败:', error);
+                                    });
+                                } else {
+                                    showToast('您的浏览器不支持分享功能', 'info');
+                                }
+                            };
+
+                            showToast('风格转换成功！', 'success');
+                        } else {
+                            showToast(data.error || '转换失败，请重试', 'error');
+                        }
+                    }, 500);
+                })
+                .catch(error => {
+                    clearInterval(progressInterval);
+                    processingOverlay.classList.remove('active');
+                    showToast('转换过程发生错误：' + error.message, 'error');
+                    console.error('Error:', error);
+                });
+            };
+        }
+    });
+    </script>
+</body>
+</html>

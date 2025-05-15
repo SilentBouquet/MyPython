@@ -1,0 +1,554 @@
+/* 认证页面特有样式 */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1A1A1A 0%, #2A2A3C 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* 粒子背景 */
+  #particles-js {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  
+  .auth-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+  }
+  
+  .auth-card {
+    background: rgba(248, 249, 250, 0.03);
+    backdrop-filter: blur(8px);
+    border-radius: var(--radius-large);
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  /* 透明玻璃效果 */
+  .auth-card:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(60deg, 
+      rgba(255, 255, 255, 0) 0%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      rgba(255, 255, 255, 0) 100%);
+    transform: rotate(25deg);
+    pointer-events: none;
+  }
+  
+  .auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .auth-logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 15px;
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  .auth-header h1 {
+    font-size: 24px;
+    margin-bottom: 5px;
+  }
+  
+  .auth-header p {
+    color: rgba(248, 249, 250, 0.6);
+    font-size: 14px;
+  }
+  
+  .auth-form {
+    margin-bottom: 20px;
+  }
+  
+  .input-wrapper {
+    position: relative;
+  }
+  
+  .input-wrapper i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(248, 249, 250, 0.5);
+  }
+  
+  .input-wrapper .input-field {
+    padding-left: 40px;
+  }
+  
+  .toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(248, 249, 250, 0.5);
+    cursor: pointer;
+    font-size: 12px;
+    user-select: none;
+  }
+  
+  .toggle-password:hover {
+    color: var(--color-light);
+  }
+  
+  .password-strength {
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  
+  .strength-bar {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s ease, background-color 0.3s ease;
+  }
+  
+  .strength-weak { 
+    width: 30%; 
+    background-color: #FF4136; 
+  }
+  
+  .strength-medium { 
+    width: 70%; 
+    background-color: #FF851B; 
+  }
+  
+  .strength-strong { 
+    width: 100%; 
+    background-color: #2ECC40; 
+  }
+  
+  .auth-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  
+  .checkbox {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 30px;
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  .checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  
+  .checkmark {
+    position: absolute;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-small);
+    transition: var(--transition-fast);
+  }
+  
+  .checkbox:hover .checkmark {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .checkbox input:checked ~ .checkmark {
+    background-color: var(--color-primary);
+  }
+  
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  
+  .checkbox input:checked ~ .checkmark:after {
+    display: block;
+  }
+  
+  .forgot-password {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: var(--transition-fast);
+  }
+  
+  .forgot-password:hover {
+    text-decoration: underline;
+  }
+  
+  .btn-block {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  
+  .auth-divider {
+    text-align: center;
+    margin: 25px 0;
+    position: relative;
+  }
+  
+  .auth-divider:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .auth-divider span {
+    position: relative;
+    background: rgba(26, 26, 26, 0.8);
+    padding: 0 15px;
+    font-size: 12px;
+    color: rgba(248, 249, 250, 0.6);
+  }
+  
+  .social-login {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .btn-social {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--color-light);
+    cursor: pointer;
+    transition: var(--transition-fast);
+  }
+  
+  .btn-social:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .btn-social.google:hover {
+    background-color: rgba(234, 67, 53, 0.2);
+    border-color: #EA4335;
+  }
+  
+  .btn-social.github:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: #FFFFFF;
+  }
+  
+  .btn-social.sso:hover {
+    background-color: rgba(42, 92, 170, 0.2);
+    border-color: var(--color-primary);
+  }
+  
+  .auth-footer {
+    text-align: center;
+    font-size: 14px;
+    color: rgba(248, 249, 250, 0.6);
+  }
+  
+  .auth-footer a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .auth-footer a:hover {
+    text-decoration: underline;
+  }
+  
+  /* 多步注册表单样式 */
+  .register-steps {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  
+  .steps-progress {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 33.333%;
+    position: relative;
+  }
+
+  .step-item:not(:last-child):after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    z-index: 1;
+    transition: var(--transition-normal);
+  }
+
+  .step-title {
+    font-size: 12px;
+    color: rgba(248, 249, 250, 0.6);
+    transition: var(--transition-normal);
+  }
+
+  .step-item.active .step-number {
+    background-color: var(--color-primary);
+  }
+
+  .step-item.active .step-title {
+    color: var(--color-light);
+  }
+
+  .step-item.completed .step-number {
+    background-color: var(--color-success);
+  }
+
+  .step-form {
+    display: none;
+  }
+
+  .step-form.active {
+    display: block;
+    animation: fadeIn 0.5s forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+  }
+
+  /* 文件上传区 */
+  .upload-area {
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-medium);
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    margin-bottom: 20px;
+  }
+
+  .upload-area:hover {
+    border-color: rgba(42, 92, 170, 0.5);
+    background-color: rgba(42, 92, 170, 0.05);
+  }
+
+  .upload-area.active {
+    border-color: var(--color-primary);
+    background-color: rgba(42, 92, 170, 0.1);
+  }
+
+  .upload-icon {
+    font-size: 40px;
+    color: rgba(248, 249, 250, 0.5);
+    margin-bottom: 15px;
+  }
+
+  .upload-text {
+    margin-bottom: 10px;
+  }
+
+  .upload-hint {
+    font-size: 12px;
+    color: rgba(248, 249, 250, 0.5);
+  }
+
+  .file-preview {
+    display: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-medium);
+    padding: 10px;
+    margin-top: 15px;
+  }
+
+  .file-preview.active {
+    display: flex;
+    align-items: center;
+  }
+
+  .file-icon {
+    font-size: 24px;
+    margin-right: 10px;
+    color: var(--color-primary);
+  }
+
+  .file-info {
+    flex: 1;
+  }
+
+  .file-name {
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .file-meta {
+    font-size: 12px;
+    color: rgba(248, 249, 250, 0.5);
+  }
+
+  .file-remove {
+    color: var(--color-secondary);
+    cursor: pointer;
+    padding: 5px;
+  }
+
+  .file-remove:hover {
+    color: #ff8c60;
+  }
+
+  /* 注册表单优化样式 */
+
+  /* 减小步骤之间的间隔 */
+  .register-steps {
+    margin-bottom: 10px !important;
+  }
+
+  .steps-progress {
+    margin-bottom: 10px !important;
+  }
+
+  /* 确保下拉框正常显示 */
+  #research-field {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--color-light);
+  }
+
+  #research-field option {
+    background-color: #2A2A3C;
+    color: var(--color-light);
+  }
+
+  /* 添加下拉箭头指示器 */
+  .input-wrapper.select-wrapper {
+    position: relative;
+  }
+
+  .input-wrapper.select-wrapper:after {
+    content: '\25BC';
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    color: rgba(248, 249, 250, 0.5);
+    pointer-events: none;
+    font-size: 12px;
+  }
+
+  /* 调小密码提示信息 */
+  .password-hints {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+  }
+
+  .password-hints .hint {
+    font-size: 11px;
+    color: rgba(248, 249, 250, 0.5);
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* 表单验证错误提示样式 */
+  .input-field.error {
+    border-color: #FF4136;
+  }
+
+  .input-group {
+    position: relative;
+  }
+
+  .error-message {
+    color: #FF4136;
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+    width: 100%;
+  }
+
+  .input-field.error ~ .error-message {
+    display: block;
+  }
+
+  /* 添加抖动动画 */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+
+  .shake {
+    animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }

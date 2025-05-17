@@ -1,24 +1,21 @@
 # app.py - 主应用文件
-from flask import Flask, request, jsonify, session, send_file, render_template, send_from_directory, make_response, \
-    redirect, url_for, flash
+import datetime
+import json
+import os
+import shutil
+import time
+import uuid
+import cv2
+import jwt
+import numpy as np
+import pandas as pd
+import pymysql
+import torch
+from flask import Flask, request, jsonify, send_file, render_template, make_response
 from flask_cors import CORS
 from ultralytics import YOLO
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-import pymysql
-import os
-import uuid
-import json
-import datetime
-import time
-import jwt
-import numpy as np
-import cv2
-import torch
-import threading
-import pandas as pd
-import shutil
-import urllib.parse
 
 app = Flask(__name__,
             static_folder='static',
@@ -33,7 +30,7 @@ app.config['REALTIME_RESULTS_FOLDER'] = 'static/realtime/'  # 添加实时监测
 app.config['JWT_SECRET'] = 'your_jwt_secret_key'
 app.config['JWT_EXPIRATION'] = 3600 * 24 * 7  # 7天
 app.config['TOKEN_EXPIRATION'] = 24 * 3600  # 24小时有效期
-PASSWORD = 'yy040806'  # 数据库密码
+PASSWORD = ''  # 数据库密码
 
 # 确保上传目录存在
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -118,6 +115,14 @@ def register():
     username = data['username']
     email = data['email']
     password = data['password']
+    terms_agreed = data.get('termsAgreed', False)
+
+    # 验证是否同意服务条款
+    if not terms_agreed:
+        return jsonify({
+            'success': False,
+            'message': '请同意服务条款和隐私政策'
+        }), 400
 
     # 连接到数据库
     conn = get_db_connection()
@@ -1986,7 +1991,7 @@ def change_password(current_user):
 
     if not user or not check_password_hash(user['password'], current_password):
         conn.close()
-        return jsonify({"success": False, "message": "当前密码不正确"}), 401
+        return jsonify({"success": False, "message": "当前密码不正确"}), 400
 
     try:
         # 更新密码
@@ -4143,6 +4148,16 @@ def start_realtime_monitoring(current_user):
     record_video = data.get('recordVideo', False)  # 是否录制视频
     remark = data.get('remark', '')
 
+    # 获取前端传来的参数
+    detection_threshold = float(data.get('detection_threshold', 0.25))  # 检测阈值
+    detection_frequency = int(data.get('detection_frequency', 5))  # 检测频率(帧)
+    save_frequency = int(data.get('save_frequency', 10))  # 保存频率(秒)
+
+    # 确保参数在合理范围内
+    detection_threshold = max(0.1, min(0.9, detection_threshold))
+    detection_frequency = max(1, min(30, detection_frequency))
+    save_frequency = max(1, min(60, save_frequency))
+
     if not model_id:
         return jsonify({"success": False, "message": "请选择模型"}), 400
 
@@ -4196,7 +4211,12 @@ def start_realtime_monitoring(current_user):
             'record_path': record_path,
             'video_writer': video_writer,
             'video_initialized': False,
-            'remark': remark
+            'remark': remark,
+            'detection_threshold': detection_threshold,
+            'detection_frequency': detection_frequency,
+            'save_frequency': save_frequency,
+            'frame_to_write': 0,  # 记录当前是否需要写入帧
+            'last_frame_time': time.time()  # 记录上一帧时间以计算实际帧率
         }
 
         # 存储会话
@@ -4262,8 +4282,31 @@ def process_realtime_frame(current_user):
         if session['record_path'] and not session['video_initialized']:
             height, width = frame.shape[:2]
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            session['video_writer'] = cv2.VideoWriter(session['record_path'], fourcc, 20.0, (width, height))
+
+            # 使用用户设置的保存频率作为视频的帧率
+            # 这将确保视频播放时长与实际监测时长一致
+            # 例如：如果用户设置每10秒保存一帧，那么视频的帧率应该是1/10 = 0.1
+            # 但由于大多数播放器不支持太低的帧率，我们设置最低为1 FPS
+            video_fps = max(1.0, 1.0 / session['save_frequency'])
+            app.logger.info(f"实时监测视频帧率设置为: {video_fps} FPS (保存频率: {session['save_frequency']}秒/帧)")
+
+            session['video_writer'] = cv2.VideoWriter(session['record_path'], fourcc, video_fps, (width, height))
             session['video_initialized'] = True
+            session['frame_to_write'] = 0
+
+        # 计算从上一帧到当前帧的时间间隔
+        current_time = time.time()
+        elapsed_since_last_frame = current_time - session.get('last_frame_time', current_time)
+        session['last_frame_time'] = current_time
+
+        # 根据保存频率决定是否写入当前帧
+        # 累计时间，只有当累计时间达到或超过保存频率时才写入帧
+        session['frame_to_write'] += elapsed_since_last_frame
+        should_write_frame = session['frame_to_write'] >= session['save_frequency']
+
+        if should_write_frame:
+            # 重置累计时间，减去已用的保存周期
+            session['frame_to_write'] -= session['save_frequency']
 
         # 帧计数增加
         session['frame_count'] += 1
@@ -4336,8 +4379,9 @@ def process_realtime_frame(current_user):
             })
 
         # 如果录制视频，写入当前帧
-        if session['video_writer']:
+        if session['video_writer'] and should_write_frame:
             session['video_writer'].write(frame)
+            app.logger.debug(f"写入帧到视频，当前帧计数: {session['frame_count']}")
 
         # 将结果帧编码为JPEG
         _, buffer = cv2.imencode('.jpg', frame)

@@ -5,13 +5,13 @@ import json
 from werkzeug.security import generate_password_hash
 import datetime
 
-# 这里填入你的数据库密码
-PASSWORD = 'yy040806'
+PASSWORD = ''
 
 
+# 数据库初始化主函数
 def initialize_database():
     try:
-        # 创建数据库连接
+        # 创建数据库连接（使用root用户进行初始设置）
         conn = pymysql.connect(
             host='localhost',
             user='root',
@@ -19,30 +19,29 @@ def initialize_database():
         )
         cursor = conn.cursor()
 
-        # 创建数据库
+        # 创建项目专用数据库
         cursor.execute("CREATE DATABASE IF NOT EXISTS remote_sensing_db")
 
-        # 切换到新创建的数据库
+        # 切换到刚创建的数据库
         cursor.execute("USE remote_sensing_db")
 
-        # 读取SQL脚本
+        # 读取数据库架构SQL脚本
         with open('database_schema.sql', 'r', encoding='utf-8') as f:
             sql_script = f.read()
 
-        # 分割并执行SQL语句，忽略表已存在的错误
+        # 执行SQL脚本中的每条语句
         for statement in sql_script.split(';'):
             if statement.strip():
                 try:
                     cursor.execute(statement)
                 except pymysql.err.InternalError as e:
-                    # 忽略"表已存在"的错误，但报告其他错误
+                    # 忽略表已存在的错误，其他错误则打印提示
                     if "already exists" not in str(e):
                         print(f"执行SQL语句出错: {e}")
                         print(f"出错的SQL: {statement}")
 
-        # 直接跳到后续步骤，确保通知和权限表存在
+        # 确保notifications表存在
         try:
-            # 检查notifications表是否存在
             cursor.execute("SHOW TABLES LIKE 'notifications'")
             if not cursor.fetchone():
                 cursor.execute("""
@@ -57,12 +56,12 @@ def initialize_database():
                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                 )
                 """)
-                print("创建notifications表")
+                print("已创建notifications表")
         except Exception as e:
             print(f"创建notifications表出错: {e}")
 
+        # 确保permission_requests表存在
         try:
-            # 检查permission_requests表是否存在
             cursor.execute("SHOW TABLES LIKE 'permission_requests'")
             if not cursor.fetchone():
                 cursor.execute("""
@@ -78,30 +77,30 @@ def initialize_database():
                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                 )
                 """)
-                print("创建permission_requests表")
+                print("已创建permission_requests表")
         except Exception as e:
             print(f"创建permission_requests表出错: {e}")
 
-        # 检查users表中是否存在新字段，不存在则添加
+        # 检查并添加users表中可能缺失的字段
         try:
             cursor.execute("DESCRIBE users")
             columns = [row[0] for row in cursor.fetchall()]
 
             if 'name' not in columns:
                 cursor.execute("ALTER TABLE users ADD COLUMN name VARCHAR(100)")
-                print("添加users.name字段")
+                print("已添加users.name字段")
 
             if 'phone' not in columns:
                 cursor.execute("ALTER TABLE users ADD COLUMN phone VARCHAR(20)")
-                print("添加users.phone字段")
+                print("已添加users.phone字段")
 
             if 'bio' not in columns:
                 cursor.execute("ALTER TABLE users ADD COLUMN bio TEXT")
-                print("添加users.bio字段")
+                print("已添加users.bio字段")
 
             if 'is_admin' not in columns:
                 cursor.execute("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT FALSE")
-                print("添加users.is_admin字段")
+                print("已添加users.is_admin字段")
         except Exception as e:
             print(f"更新users表结构出错: {e}")
 
@@ -121,7 +120,7 @@ def initialize_database():
         )
         ''')
 
-        # 创建数据库用户并授权
+        # 创建数据库访问用户并授予权限
         try:
             cursor.execute("CREATE USER IF NOT EXISTS 'remote_sensing_user'@'localhost' IDENTIFIED BY 'your_password'")
             cursor.execute("GRANT ALL PRIVILEGES ON remote_sensing_db.* TO 'remote_sensing_user'@'localhost'")
@@ -129,6 +128,7 @@ def initialize_database():
         except Exception as e:
             print(f"创建数据库用户出错: {e}")
 
+        # 提交更改并关闭连接
         conn.commit()
         conn.close()
 
@@ -139,9 +139,10 @@ def initialize_database():
         return False
 
 
+# 添加默认系统模型
 def add_default_models():
     try:
-        # 创建数据库连接
+        # 连接到项目数据库
         conn = pymysql.connect(
             host='localhost',
             user='root',
@@ -155,20 +156,20 @@ def add_default_models():
         # 清空现有系统模型
         cursor.execute("DELETE FROM models WHERE is_system = 1")
 
-        # 获取当前脚本的绝对路径
+        # 获取当前脚本所在目录
         current_dir = os.path.dirname(os.path.abspath(__file__))
 
-        # 确保模型目录存在
+        # 确保系统模型目录存在
         model_dir = os.path.join(current_dir, 'models', 'system')
         os.makedirs(model_dir, exist_ok=True)
 
-        # 扫描模型目录中已存在的模型文件
+        # 扫描模型目录中的模型文件
         model_files = []
         for file in os.listdir(model_dir):
             if file.endswith(('.pt', '.pth', '.h5')):
                 model_files.append(file)
 
-        # 只加载实际存在的模型文件
+        # 为每个模型文件创建数据库记录
         if model_files:
             print(f"发现{len(model_files)}个模型文件")
             example_image_path = os.path.join('static', 'images', 'default_input.jpg')
@@ -176,8 +177,7 @@ def add_default_models():
             for file in model_files:
                 model_path = os.path.join(model_dir, file)
 
-                # 尝试从文件名中提取模型类型
-                model_type = 'general'
+                # 根据文件名猜测模型类型和名称
                 if 'landcover' in file.lower():
                     model_type = 'landcover'
                     model_name = '土地覆盖分类模型'
@@ -199,33 +199,38 @@ def add_default_models():
                     model_name = 'YOLO目标检测模型'
                     description = '基于YOLO算法的目标检测模型，支持多种目标类型识别，适用于图像和视频'
                 else:
+                    model_type = 'general'
                     model_name = f'通用遥感分析模型({file})'
                     description = '系统自动识别的遥感图像分析模型'
 
+                # 插入模型记录
                 cursor.execute(
-                    """INSERT INTO models \
-                    (name, type, description, path, example_image, result_example_image, is_system, is_shared, accuracy, usage_count, supports_video, created_at) \
+                    """INSERT INTO models 
+                    (name, type, description, path, example_image, result_example_image, 
+                    is_system, is_shared, accuracy, usage_count, supports_video, created_at) 
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())""",
-                    (model_name, model_type, description, model_path, example_image_path, result_example_image_path,
-                     True, True, 0.0, 0, True)
+                    (model_name, model_type, description, model_path, example_image_path,
+                     result_example_image_path, True, True, 0.0, 0, True)
                 )
-                print(f"添加模型: {model_name} (从文件: {file})")
+                print(f"添加模型: {model_name} (文件: {file})")
         else:
-            print("未找到现有模型文件，不初始化任何默认模型")
+            print("未找到模型文件，跳过添加默认模型步骤")
 
+        # 提交更改并关闭连接
         conn.commit()
         conn.close()
 
-        print("模型添加成功！")
+        print("模型添加完成！")
         return True
     except Exception as e:
         print(f"添加模型失败: {e}")
         return False
 
 
+# 创建管理员用户
 def create_admin_user():
     try:
-        # 创建数据库连接
+        # 连接到项目数据库
         conn = pymysql.connect(
             host='localhost',
             user='root',
@@ -236,13 +241,13 @@ def create_admin_user():
         )
         cursor = conn.cursor()
 
-        # 直接插入管理员账户（如已存在则忽略重复）
+        # 插入管理员账户（如果已存在则跳过）
         hashed_password = generate_password_hash('admin123')
         try:
             cursor.execute(
-                """INSERT INTO users \
-                   (username, email, password, organization, department, license_number, \
-                    research_field, platforms, usage_purpose, name, phone, bio, is_admin, created_at) \
+                """INSERT INTO users 
+                   (username, email, password, organization, department, license_number, 
+                    research_field, platforms, usage_purpose, name, phone, bio, is_admin, created_at) 
                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                 ('admin', 'admin@example.com', hashed_password, '系统管理', '管理部门', 'ADMIN-LICENSE',
                  '系统管理', json.dumps([]), '系统管理', '系统管理员', '13800138000',
@@ -251,57 +256,66 @@ def create_admin_user():
             admin_id = cursor.lastrowid
         except Exception as e:
             print(f"插入管理员账户时可能已存在，忽略: {e}")
-            # 查询admin用户id
+            # 查询admin用户ID
             cursor.execute("SELECT id FROM users WHERE username = 'admin'")
             row = cursor.fetchone()
             admin_id = row['id'] if row else None
 
-            # 确保admin用户有管理员权限
+            # 确保admin用户具有管理员权限
             if admin_id:
                 cursor.execute("UPDATE users SET is_admin = 1 WHERE id = %s", (admin_id,))
-                print(f"更新admin用户为管理员权限成功")
+                print(f"已更新admin用户为管理员权限")
 
-        # 为管理员添加一条欢迎通知（如有id）
+        # 为管理员添加欢迎通知
         if admin_id:
             current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             cursor.execute(
-                """INSERT INTO notifications \
-                   (user_id, title, content, type, is_read, created_at)\
+                """INSERT INTO notifications 
+                   (user_id, title, content, type, is_read, created_at) 
                    VALUES (%s, %s, %s, %s, %s, %s)""",
                 (
-                admin_id, '欢迎使用遥感图像识别系统', '感谢您使用本系统，这里是管理员账号，您可以管理系统资源和用户权限。',
-                'info', 0, current_time)
+                    admin_id, '欢迎使用遥感图像识别系统',
+                    '感谢您使用本系统，这里是管理员账号，您可以管理系统资源和用户权限。',
+                    'info', 0, current_time
+                )
             )
 
+        # 提交更改并关闭连接
         conn.commit()
         conn.close()
 
-        print("管理员账户已初始化！默认账号：admin，密码：admin123")
+        print("管理员账户初始化完成！默认账号：admin，密码：admin123")
         return True
     except Exception as e:
         print(f"创建管理员账户失败: {e}")
         return False
 
 
+# 创建必要的目录结构
 def create_directories():
     try:
-        # 创建必要的目录
+        # 创建上传文件目录
         os.makedirs('uploads', exist_ok=True)
+        # 创建系统模型目录
         os.makedirs('models/system', exist_ok=True)
+        # 创建自定义模型目录
         os.makedirs('models/custom', exist_ok=True)
-        os.makedirs('static/results', exist_ok=True)  # 图像结果目录
-        os.makedirs('static/videos', exist_ok=True)  # 视频结果目录
+        # 创建图像结果存储目录
+        os.makedirs('static/results', exist_ok=True)
+        # 创建视频结果存储目录
+        os.makedirs('static/videos', exist_ok=True)
 
-        print("目录创建成功！")
+        print("目录结构创建完成！")
         return True
     except Exception as e:
         print(f"创建目录失败: {e}")
         return False
 
 
+# 更新数据库架构（添加新字段或表）
 def update_database_schema():
     try:
-        # 创建数据库连接
+        # 连接到项目数据库
         conn = pymysql.connect(
             host='localhost',
             user='root',
@@ -312,79 +326,79 @@ def update_database_schema():
         )
         cursor = conn.cursor()
 
-        # 检查images表是否有file_type列
+        # 检查并添加images表的file_type字段
         cursor.execute("SHOW COLUMNS FROM images LIKE 'file_type'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE images ADD COLUMN file_type VARCHAR(10) DEFAULT 'image'")
-            print("images表添加file_type字段成功")
+            print("已添加images.file_type字段")
 
-        # 检查images表是否有duration列
+        # 检查并添加images表的duration字段
         cursor.execute("SHOW COLUMNS FROM images LIKE 'duration'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE images ADD COLUMN duration FLOAT")
-            print("images表添加duration字段成功")
+            print("已添加images.duration字段")
 
-        # 检查images表是否有frame_count列
+        # 检查并添加images表的frame_count字段
         cursor.execute("SHOW COLUMNS FROM images LIKE 'frame_count'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE images ADD COLUMN frame_count INT")
-            print("images表添加frame_count字段成功")
+            print("已添加images.frame_count字段")
 
-        # 检查models表是否有supports_video列
+        # 检查并添加models表的supports_video字段
         cursor.execute("SHOW COLUMNS FROM models LIKE 'supports_video'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE models ADD COLUMN supports_video BOOLEAN DEFAULT TRUE")
-            print("models表添加supports_video字段成功")
+            print("已添加models.supports_video字段")
 
-        # 检查models表是否有result_example_image列
+        # 检查并添加models表的result_example_image字段
         cursor.execute("SHOW COLUMNS FROM models LIKE 'result_example_image'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE models ADD COLUMN result_example_image VARCHAR(255)")
-            print("models表添加result_example_image字段成功")
+            print("已添加models.result_example_image字段")
 
-        # 检查models表是否有parameters列
+        # 检查并添加models表的parameters字段
         cursor.execute("SHOW COLUMNS FROM models LIKE 'parameters'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE models ADD COLUMN parameters TEXT")
-            print("models表添加parameters字段成功")
+            print("已添加models.parameters字段")
 
-        # 检查models表是否有instructions列
+        # 检查并添加models表的instructions字段
         cursor.execute("SHOW COLUMNS FROM models LIKE 'instructions'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE models ADD COLUMN instructions TEXT")
-            print("models表添加instructions字段成功")
+            print("已添加models.instructions字段")
 
-        # 检查processing_history表是否有object_count列
+        # 检查并添加processing_history表的object_count字段
         cursor.execute("SHOW COLUMNS FROM processing_history LIKE 'object_count'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE processing_history ADD COLUMN object_count INT")
-            print("processing_history表添加object_count字段成功")
+            print("已添加processing_history.object_count字段")
 
-        # 检查processing_history表是否有categories列
+        # 检查并添加processing_history表的categories字段
         cursor.execute("SHOW COLUMNS FROM processing_history LIKE 'categories'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE processing_history ADD COLUMN categories JSON")
-            print("processing_history表添加categories字段成功")
+            print("已添加processing_history.categories字段")
 
-        # 检查processing_history表是否有file_type列
+        # 检查并添加processing_history表的file_type字段
         cursor.execute("SHOW COLUMNS FROM processing_history LIKE 'file_type'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE processing_history ADD COLUMN file_type VARCHAR(10) DEFAULT 'image'")
-            print("processing_history表添加file_type字段成功")
+            print("已添加processing_history.file_type字段")
 
-        # 检查processing_history表是否有status列
+        # 检查并添加processing_history表的status字段
         cursor.execute("SHOW COLUMNS FROM processing_history LIKE 'status'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE processing_history ADD COLUMN status VARCHAR(20) DEFAULT 'completed'")
-            print("processing_history表添加status字段成功")
+            print("已添加processing_history.status字段")
 
-        # 检查processing_history表是否有progress列
+        # 检查并添加processing_history表的progress字段
         cursor.execute("SHOW COLUMNS FROM processing_history LIKE 'progress'")
         if not cursor.fetchone():
             cursor.execute("ALTER TABLE processing_history ADD COLUMN progress INT DEFAULT 100")
-            print("processing_history表添加progress字段成功")
+            print("已添加processing_history.progress字段")
 
-        # 检查是否存在processing_jobs表
+        # 检查并创建processing_jobs表
         cursor.execute("SHOW TABLES LIKE 'processing_jobs'")
         if not cursor.fetchone():
             cursor.execute("""
@@ -403,24 +417,31 @@ def update_database_schema():
                 FOREIGN KEY (history_id) REFERENCES processing_history(id) ON DELETE CASCADE
             )
             """)
-            print("创建processing_jobs表成功")
+            print("已创建processing_jobs表")
 
+        # 提交更改并关闭连接
         conn.commit()
         conn.close()
 
-        print("数据库架构更新成功！")
+        print("数据库架构更新完成！")
         return True
     except Exception as e:
         print(f"数据库架构更新失败: {e}")
         return False
 
 
+# 主程序入口
 if __name__ == '__main__':
     print("开始初始化遥感图像识别系统...")
 
-    if create_directories() and initialize_database() and add_default_models() and create_admin_user() and update_database_schema():
-        print("系统初始化完成！")
+    # 依次执行初始化步骤
+    if (create_directories() and
+            initialize_database() and
+            add_default_models() and
+            create_admin_user() and
+            update_database_schema()):
+        print("系统初始化成功！")
         print("系统现已支持图像和视频处理功能！")
     else:
-        print("系统初始化失败，请检查错误信息并重试。")
+        print("系统初始化失败，请根据提示信息检查并重试。")
         sys.exit(1)

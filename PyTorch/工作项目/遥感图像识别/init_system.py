@@ -5,7 +5,7 @@ import json
 from werkzeug.security import generate_password_hash
 import datetime
 
-PASSWORD = ''
+PASSWORD = 'yy040806'
 
 
 # 数据库初始化主函数

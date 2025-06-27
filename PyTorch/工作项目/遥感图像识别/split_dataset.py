@@ -9,7 +9,7 @@ source_ground_truth_path = os.path.join(source_dataset_path, "ground truth")
 source_yolo_labels_path = os.path.join(source_dataset_path, "yolo_labels")
 
 # 目标数据集路径
-target_dataset_path = r"D:\pycharm\python项目\PyTorch\ultralytics-8.3.91\ultralytics\datasets"  # 替换为你希望保存分割后数据集的路径
+target_dataset_path = r"D:\pycharm\python项目\PyTorch\ultralytics-8.3.91\ultralytics\datasets"
 target_images_path = os.path.join(target_dataset_path, "images")
 target_labels_path = os.path.join(target_dataset_path, "labels")
 target_train_images_path = os.path.join(target_images_path, "train")

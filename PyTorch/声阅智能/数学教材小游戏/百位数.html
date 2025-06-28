@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>百数表小游戏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+            margin: 0;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        header {
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #025aa5;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .description {
+            color: #4a6fa5;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .game-mode-selection {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .game-mode-selection button {
+            padding: 12px 25px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 25px;
+            background-color: #5cb85c;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .game-mode-selection button:hover {
+            background-color: #4cae4c;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-mode-selection button:active {
+            transform: translateY(1px);
+        }
+
+        .game-mode-selection button.active {
+            background-color: #025aa5;
+            box-shadow: 0 0 0 3px rgba(2, 90, 165, 0.3);
+        }
+
+        .game-mode {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            animation: fadeIn 0.5s ease;
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .game-mode.active {
+            display: block;
+        }
+
+        h2 {
+            color: #5cb85c;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: #5cb85c;
+            border-radius: 2px;
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Mode 1 Styles */
+        .hundred-chart {
+            display: grid;
+            grid-template-columns: repeat(10, 38px);
+            grid-template-rows: repeat(10, 38px);
+            gap: 2px;
+            margin: 15px auto;
+            border: 2px solid #0275d8;
+            width: fit-content;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f0f8ff;
+        }
+
+        .chart-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #ddd;
+            font-size: 0.9em;
+            background-color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+        .chart-cell input[type="text"] {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 0.9em;
+            box-sizing: border-box;
+            background-color: #eef;
+            outline: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .chart-cell input[type="text"]:focus {
+            background-color: #e0e0ff;
+        }
+
+        .chart-cell.correct {
+            background-color: #dff0d8;
+        }
+
+        .chart-cell.incorrect {
+            background-color: #f2dede;
+        }
+
+        .chart-cell.correct input[type="text"] {
+            background-color: #dff0d8;
+        }
+
+        .chart-cell.incorrect input[type="text"] {
+            background-color: #f2dede;
+            color: #d9534f;
+        }
+
+        .chart-cell.empty {
+            background-color: #fcf8e3;
+        }
+
+        .chart-cell.empty input[type="text"] {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+        }
+
+        .chart-cell.correct input[type="text"] {
+            background-color: #dff0d8;
+            color: #333;
+        }
+
+        .chart-cell:not(.correct):not(.incorrect):not(.empty) input[type="text"] {
+            background-color: #eef;
+        }
+
+        /* Mode 2 Styles */
+        .surrounding-numbers-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px auto;
+        }
+
+        .surrounding-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 55px);
+            grid-template-rows: repeat(3, 55px);
+            gap: 4px;
+            border: 2px solid #0275d8;
+            border-radius: 8px;
+            padding: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .grid-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+
+        .center-cell {
+            background-color: #a0d0f0;
+            font-weight: bold;
+            font-size: 1.3em;
+            color: #025aa5;
+            border: 2px solid #025aa5;
+        }
+
+        .grid-cell input[type="text"] {
+            width: calc(100% - 10px);
+            height: calc(100% - 10px);
+            padding: 5px;
+            border: none;
+            text-align: center;
+            font-size: 1em;
+            box-sizing: border-box;
+            background-color: #eef;
+            outline: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .grid-cell input[type="text"]:focus {
+            background-color: #e0e0ff;
+        }
+
+        .grid-cell:not(.correct):not(.incorrect):not(.empty) input[type="text"] {
+            background-color: #eef;
+        }
+
+        .grid-cell.correct {
+            background-color: #dff0d8;
+        }
+
+        .grid-cell.incorrect {
+            background-color: #f2dede;
+        }
+
+        .grid-cell.incorrect input[type="text"] {
+            background-color: #f2dede;
+            color: #d9534f;
+        }
+
+        .grid-cell.empty {
+            background-color: #fcf8e3;
+        }
+
+        .grid-cell.empty input[type="text"] {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+        }
+
+        .grid-cell.correct input[type="text"] {
+            background-color: #dff0d8;
+            color: #333;
+        }
+
+        /* Digital Keyboard */
+        .digital-keyboard {
+            margin: 15px auto;
+            display: grid;
+            grid-template-columns: repeat(6, 50px);
+            gap: 8px;
+            justify-content: center;
+            max-width: 360px;
+        }
+
+        .keyboard-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #0275d8;
+            background-color: #fff;
+            color: #0275d8;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .keyboard-btn:hover {
+            background-color: #0275d8;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .keyboard-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .keyboard-btn.clear {
+            background-color: #f0ad4e;
+            color: white;
+            border-color: #f0ad4e;
+        }
+
+        .keyboard-btn.clear:hover {
+            background-color: #ec971f;
+            border-color: #ec971f;
+        }
+
+        .keyboard-btn.disabled {
+            background-color: #f5f5f5;
+            color: #999;
+            border-color: #ddd;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .keyboard-btn.disabled:hover {
+            background-color: #f5f5f5;
+            color: #999;
+            transform: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Game controls */
+        .game-controls {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 0.95em;
+            cursor: pointer;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background-color: #0275d8;
+        }
+
+        .btn-primary:hover {
+            background-color: #025aa5;
+        }
+
+        .btn-secondary {
+            background-color: #5cb85c;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4cae4c;
+        }
+
+        .btn-warning {
+            background-color: #f0ad4e;
+        }
+
+        .btn-warning:hover {
+            background-color: #ec971f;
+        }
+
+        .btn-danger {
+            background-color: #d9534f;
+        }
+
+        .btn-danger:hover {
+            background-color: #c9302c;
+        }
+
+        button.hidden {
+            display: none;
+        }
+
+        .result {
+            margin-top: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            min-height: 1.2em;
+            padding: 10px;
+            border-radius: 6px;
+            width: 100%;
+        }
+
+        .result.correct {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+
+        .result.incorrect {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+
+        .result.info {
+            background-color: #d9edf7;
+            color: #31708f;
+            border: 1px solid #bce8f1;
+        }
+
+        .result.warning {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+            border: 1px solid #faebcc;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .hundred-chart {
+                grid-template-columns: repeat(10, 30px);
+                grid-template-rows: repeat(10, 30px);
+            }
+
+            .surrounding-grid {
+                grid-template-columns: repeat(3, 45px);
+                grid-template-rows: repeat(3, 45px);
+            }
+
+            .game-controls {
+                gap: 8px;
+            }
+
+            button {
+                padding: 8px 15px;
+                font-size: 0.85em;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .game-mode-selection {
+                flex-direction: column;
+            }
+
+            .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-table"></i> 百数表小游戏</h1>
+            <p class="description">通过游戏学习数字规律，提升数学思维能力</p>
+        </header>
+
+        <div class="game-mode-selection">
+            <button id="mode1-btn" class="active">
+                <i class="fas fa-th-large"></i> 模式一：填充百数表
+            </button>
+            <button id="mode2-btn">
+                <i class="fas fa-border-all"></i> 模式二：填写周围数字
+            </button>
+        </div>
+
+        <div id="mode1" class="game-mode active">
+            <h2>填充百数表</h2>
+            <div class="game-area">
+                <div class="hundred-chart" id="hundred-chart">
+                    <!-- 百数表将在这里生成 -->
+                </div>
+                <div class="digital-keyboard" id="keyboard-mode1">
+                    <div class="keyboard-btn" data-number="1">1</div>
+                    <div class="keyboard-btn" data-number="2">2</div>
+                    <div class="keyboard-btn" data-number="3">3</div>
+                    <div class="keyboard-btn" data-number="4">4</div>
+                    <div class="keyboard-btn" data-number="5">5</div>
+                    <div class="keyboard-btn" data-number="6">6</div>
+                    <div class="keyboard-btn" data-number="7">7</div>
+                    <div class="keyboard-btn" data-number="8">8</div>
+                    <div class="keyboard-btn" data-number="9">9</div>
+                    <div class="keyboard-btn" data-number="0">0</div>
+                    <div class="keyboard-btn clear" data-action="delete">
+                        <i class="fas fa-backspace"></i>
+                    </div>
+                    <div class="keyboard-btn clear" data-action="clear">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                </div>
+                <div class="game-controls">
+                    <button id="next-mode1" class="btn-secondary">
+                        <i class="fas fa-forward"></i> 下一题
+                    </button>
+                    <button id="restart-mode1" class="btn-warning">
+                        <i class="fas fa-redo"></i> 重新开始
+                    </button>
+                    <button id="check-mode1" class="btn-primary">
+                        <i class="fas fa-check-circle"></i> 提交答案
+                    </button>
+                    <button id="show-answer-mode1" class="btn-danger hidden">
+                        <i class="fas fa-eye"></i> 查看答案
+                    </button>
+                </div>
+                <div id="mode1-result" class="result"></div>
+            </div>
+        </div>
+
+        <div id="mode2" class="game-mode">
+            <h2>填写周围数字</h2>
+            <div class="game-area">
+                <div class="surrounding-numbers-container">
+                    <div class="surrounding-grid" id="surrounding-grid">
+                        <div class="grid-cell" data-position="top-left"></div>
+                        <div class="grid-cell" data-position="top"></div>
+                        <div class="grid-cell" data-position="top-right"></div>
+                        <div class="grid-cell" data-position="left"></div>
+                        <div class="grid-cell center-cell" data-position="center"><span id="mode2-center-num"></span></div>
+                        <div class="grid-cell" data-position="right"></div>
+                        <div class="grid-cell" data-position="bottom-left"></div>
+                        <div class="grid-cell" data-position="bottom"></div>
+                        <div class="grid-cell" data-position="bottom-right"></div>
+                    </div>
+                </div>
+                <div class="digital-keyboard" id="keyboard-mode2">
+                    <div class="keyboard-btn" data-number="1">1</div>
+                    <div class="keyboard-btn" data-number="2">2</div>
+                    <div class="keyboard-btn" data-number="3">3</div>
+                    <div class="keyboard-btn" data-number="4">4</div>
+                    <div class="keyboard-btn" data-number="5">5</div>
+                    <div class="keyboard-btn" data-number="6">6</div>
+                    <div class="keyboard-btn" data-number="7">7</div>
+                    <div class="keyboard-btn" data-number="8">8</div>
+                    <div class="keyboard-btn" data-number="9">9</div>
+                    <div class="keyboard-btn" data-number="0">0</div>
+                    <div class="keyboard-btn clear" data-action="delete">
+                        <i class="fas fa-backspace"></i>
+                    </div>
+                    <div class="keyboard-btn clear" data-action="clear">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                </div>
+                <div class="game-controls">
+                    <button id="next-mode2" class="btn-secondary">
+                        <i class="fas fa-forward"></i> 下一题
+                    </button>
+                    <button id="restart-mode2" class="btn-warning">
+                        <i class="fas fa-redo"></i> 重新开始
+                    </button>
+                    <button id="check-mode2" class="btn-primary">
+                        <i class="fas fa-check-circle"></i> 提交答案
+                    </button>
+                    <button id="show-answer-mode2" class="btn-danger hidden">
+                        <i class="fas fa-eye"></i> 查看答案
+                    </button>
+                </div>
+                <div id="mode2-result" class="result"></div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 元素引用
+            const mode1Btn = document.getElementById('mode1-btn');
+            const mode2Btn = document.getElementById('mode2-btn');
+            const mode1Div = document.getElementById('mode1');
+            const mode2Div = document.getElementById('mode2');
+
+            const hundredChartDiv = document.getElementById('hundred-chart');
+            const checkMode1Btn = document.getElementById('check-mode1');
+            const mode1ResultDiv = document.getElementById('mode1-result');
+            const showAnswerMode1Btn = document.getElementById('show-answer-mode1');
+            const nextMode1Btn = document.getElementById('next-mode1');
+            const restartMode1Btn = document.getElementById('restart-mode1');
+
+            const mode2CenterNumSpan = document.getElementById('mode2-center-num');
+            const surroundingGridDiv = document.getElementById('surrounding-grid');
+            const checkMode2Btn = document.getElementById('check-mode2');
+            const mode2ResultDiv = document.getElementById('mode2-result');
+            const showAnswerMode2Btn = document.getElementById('show-answer-mode2');
+            const nextMode2Btn = document.getElementById('next-mode2');
+            const restartMode2Btn = document.getElementById('restart-mode2');
+
+            // 游戏状态
+            let mode1Answers = {};
+            let mode1Attempts = 3;
+            let mode1EmptyIndices = [];
+
+            let mode2CorrectAnswers = {};
+            let mode2Attempts = 3;
+            let mode2CenterNum = 0;
+            let mode2EmptyPositions = [];
+
+            const MAX_ATTEMPTS = 3;
+
+            // 当前焦点输入框
+            let currentFocusedInput = null;
+
+            // --- 模式切换 ---
+            function activateMode(mode) {
+                mode1Btn.classList.toggle('active', mode === 'mode1');
+                mode2Btn.classList.toggle('active', mode === 'mode2');
+                mode1Div.classList.toggle('active', mode === 'mode1');
+                mode2Div.classList.toggle('active', mode === 'mode2');
+            }
+
+            mode1Btn.addEventListener('click', () => {
+                activateMode('mode1');
+            });
+
+            mode2Btn.addEventListener('click', () => {
+                activateMode('mode2');
+                if (mode2CenterNum === 0) {
+                    generateMode2();
+                }
+            });
+
+            // 更新数字键盘按钮状态
+            function updateKeyboardState() {
+                if (currentFocusedInput) {
+                    const currentValue = currentFocusedInput.value.trim();
+                    const isFull = currentValue.length >= 2;
+
+                    // 找到当前活跃模式的键盘
+                    const activeMode = mode1Div.classList.contains('active') ? 'mode1' : 'mode2';
+                    const keyboard = document.getElementById(`keyboard-${activeMode}`);
+                    const numberButtons = keyboard.querySelectorAll('.keyboard-btn[data-number]');
+
+                    // 更新数字按钮状态
+                    numberButtons.forEach(btn => {
+                        if (isFull) {
+                            btn.classList.add('disabled');
+                        } else {
+                            btn.classList.remove('disabled');
+                        }
+                    });
+                }
+            }
+
+            // 输入框行为控制
+            function setupInputBehavior(input) {
+                // 保存原始占位符
+                const originalPlaceholder = input.placeholder;
+
+                input.addEventListener('focus', () => {
+                    input.placeholder = ''; // 清除占位符
+                    currentFocusedInput = input;
+                    updateKeyboardState(); // 更新键盘状态
+                });
+
+                input.addEventListener('blur', () => {
+                    if (input.value === '') {
+                        input.placeholder = originalPlaceholder; // 恢复占位符
+                    }
+                    currentFocusedInput = null;
+                    // 清除所有键盘按钮的禁用状态
+                    document.querySelectorAll('.keyboard-btn.disabled').forEach(btn => {
+                        btn.classList.remove('disabled');
+                    });
+                });
+
+                // 限制输入长度和内容
+                input.addEventListener('input', (e) => {
+                    let value = e.target.value;
+                    // 只允许数字，并限制最多两位
+                    value = value.replace(/[^0-9]/g, '').slice(0, 2);
+                    e.target.value = value;
+                    updateKeyboardState(); // 更新键盘状态
+                });
+
+                // 防止键盘输入超过两位数字
+                input.addEventListener('keypress', (e) => {
+                    // 只允许数字键
+                    if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                    // 如果已经有两位数字，阻止继续输入
+                    if (e.target.value.length >= 2 && /[0-9]/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            // 数字键盘功能
+            function setupDigitalKeyboard(keyboardId) {
+                const keyboard = document.getElementById(keyboardId);
+                const buttons = keyboard.querySelectorAll('.keyboard-btn');
+
+                buttons.forEach(button => {
+                    button.addEventListener('mousedown', (e) => {
+                        // 阻止默认行为，防止输入框失去焦点
+                        e.preventDefault();
+                    });
+
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault(); // 阻止默认行为
+                        if (currentFocusedInput) {
+                            const number = button.dataset.number;
+                            const action = button.dataset.action;
+
+                            if (number) {
+                                // 检查按钮是否被禁用
+                                if (button.classList.contains('disabled')) {
+                                    currentFocusedInput.focus();
+                                    return;
+                                }
+
+                                // 数字输入逻辑
+                                let currentValue = currentFocusedInput.value.trim();
+
+                                if (currentValue.length >= 2) {
+                                    // 如果已经有两位数字，不允许继续输入，直接返回
+                                    currentFocusedInput.focus();
+                                    return;
+                                } else {
+                                    // 追加数字
+                                    currentFocusedInput.value = currentValue + number;
+                                }
+
+                                // 触发input事件以便其他监听器知道值已改变
+                                currentFocusedInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                // 保持焦点在输入框上
+                                currentFocusedInput.focus();
+                            } else if (action) {
+                                // 删除操作
+                                if (action === 'delete') {
+                                    // 删除最后一个字符
+                                    let currentValue = currentFocusedInput.value;
+                                    currentFocusedInput.value = currentValue.slice(0, -1);
+                                } else if (action === 'clear') {
+                                    // 清空所有内容
+                                    currentFocusedInput.value = '';
+                                }
+
+                                // 触发input事件
+                                currentFocusedInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                // 保持焦点在输入框上
+                                currentFocusedInput.focus();
+                            }
+                        }
+                    });
+                });
+            }
+
+            // --- 模式1逻辑 ---
+            function generateHundredChart() {
+                hundredChartDiv.innerHTML = '';
+                mode1Answers = {};
+                mode1Attempts = MAX_ATTEMPTS;
+                mode1ResultDiv.textContent = '';
+                mode1ResultDiv.className = 'result';
+                showAnswerMode1Btn.classList.add('hidden');
+                checkMode1Btn.disabled = false;
+
+                // 重置按钮状态
+                nextMode1Btn.disabled = false;
+                restartMode1Btn.disabled = false;
+
+                const totalCells = 100;
+                const emptyCellCount = 15;
+
+                let numbers = Array.from({ length: totalCells }, (_, i) => i + 1);
+                let emptyCellIndices = new Set();
+
+                // 选择要留空的随机索引
+                while (emptyCellIndices.size < emptyCellCount) {
+                    const randomIndex = Math.floor(Math.random() * totalCells);
+                    emptyCellIndices.add(randomIndex);
+                }
+
+                mode1EmptyIndices = Array.from(emptyCellIndices);
+
+                for (let i = 0; i < totalCells; i++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('chart-cell');
+
+                    if (emptyCellIndices.has(i)) {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.dataset.index = i;
+                        input.placeholder = '?';
+                        cell.appendChild(input);
+                        mode1Answers[i] = numbers[i];
+
+                        // 设置输入框行为
+                        setupInputBehavior(input);
+                    } else {
+                        cell.textContent = numbers[i];
+                    }
+                    hundredChartDiv.appendChild(cell);
+                }
+            }
+
+            function checkMode1() {
+                if (mode1Attempts <= 0) return;
+
+                const inputs = hundredChartDiv.querySelectorAll('.chart-cell input[type="text"]');
+
+                // 检查是否全部为空
+                let hasAnyInput = false;
+                inputs.forEach(input => {
+                    if (input.value.trim() !== '') {
+                        hasAnyInput = true;
+                    }
+                });
+
+                if (!hasAnyInput) {
+                    mode1ResultDiv.textContent = '请至少填写一个空白格子！';
+                    mode1ResultDiv.className = 'result warning';
+                    return;
+                }
+
+                let allCorrect = true;
+                let incorrectCount = 0;
+
+                inputs.forEach(input => {
+                    const index = parseInt(input.dataset.index);
+                    const userAnswer = parseInt(input.value) || 0;
+                    const correctAnswer = mode1Answers[index];
+                    const cell = input.parentElement;
+
+                    cell.classList.remove('correct', 'incorrect', 'empty');
+
+                    if (input.value.trim() === '') {
+                        // 未填写 - 黄色
+                        cell.classList.add('empty');
+                        allCorrect = false;
+                        incorrectCount++;
+                    } else if (userAnswer !== correctAnswer) {
+                        // 填写错误 - 红色框+红色数字
+                        cell.classList.add('incorrect');
+                        allCorrect = false;
+                        incorrectCount++;
+                    } else {
+                        // 正确答案 - 绿色框+黑色数字
+                        cell.classList.add('correct');
+                    }
+                });
+
+                if (allCorrect && inputs.length > 0) {
+                    mode1ResultDiv.textContent = '恭喜你，全部正确！';
+                    mode1ResultDiv.className = 'result correct';
+                    checkMode1Btn.disabled = true;
+                    nextMode1Btn.focus();
+                } else if (inputs.length === 0) {
+                    mode1ResultDiv.textContent = '没有需要填写的空位。';
+                    mode1ResultDiv.className = 'result info';
+                } else {
+                    mode1Attempts--;
+
+                    if (mode1Attempts > 0) {
+                        mode1ResultDiv.textContent = `有${incorrectCount}处错误，剩余机会：${mode1Attempts}次`;
+                        mode1ResultDiv.className = 'result incorrect';
+                    } else {
+                        mode1ResultDiv.textContent = '机会已用尽，请查看答案';
+                        mode1ResultDiv.className = 'result incorrect';
+                        checkMode1Btn.disabled = true;
+                        showAnswerMode1Btn.classList.remove('hidden');
+                    }
+                }
+            }
+
+            function showAnswerMode1() {
+                const inputs = hundredChartDiv.querySelectorAll('.chart-cell input[type="text"]');
+                inputs.forEach(input => {
+                    const index = parseInt(input.dataset.index);
+                    input.value = mode1Answers[index];
+                    const cell = input.parentElement;
+                    cell.classList.remove('incorrect');
+                    cell.classList.add('correct');
+                    input.readOnly = true;
+                });
+                showAnswerMode1Btn.classList.add('hidden');
+            }
+
+            function restartMode1() {
+                // 保留相同的空白位置重新开始
+                hundredChartDiv.innerHTML = '';
+                mode1Attempts = MAX_ATTEMPTS;
+                mode1ResultDiv.textContent = '';
+                mode1ResultDiv.className = 'result';
+                showAnswerMode1Btn.classList.add('hidden');
+                checkMode1Btn.disabled = false;
+
+                let numbers = Array.from({ length: 100 }, (_, i) => i + 1);
+
+                for (let i = 0; i < 100; i++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('chart-cell');
+
+                    if (mode1EmptyIndices.includes(i)) {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.dataset.index = i;
+                        input.placeholder = '?';
+                        cell.appendChild(input);
+                        setupInputBehavior(input);
+                    } else {
+                        cell.textContent = numbers[i];
+                    }
+                    hundredChartDiv.appendChild(cell);
+                }
+            }
+
+            // 绑定模式1按钮事件
+            checkMode1Btn.addEventListener('click', checkMode1);
+            showAnswerMode1Btn.addEventListener('click', showAnswerMode1);
+            nextMode1Btn.addEventListener('click', generateHundredChart);
+            restartMode1Btn.addEventListener('click', restartMode1);
+
+            // --- 模式2逻辑 ---
+            const surroundingPositions = ['top-left', 'top', 'top-right', 'left', 'right', 'bottom-left', 'bottom', 'bottom-right'];
+
+            function generateMode2() {
+                resetMode2();
+
+                // 生成随机中心数字 (11-89，避免边缘问题)
+                mode2CenterNum = Math.floor(Math.random() * 79) + 11;
+                mode2CenterNumSpan.textContent = mode2CenterNum;
+
+                let availablePositions = [];
+                surroundingPositions.forEach(position => {
+                    const num = getSurroundingNumber(mode2CenterNum, position);
+                    if (num !== null) {
+                        availablePositions.push({ position: position, value: num });
+                    }
+                });
+
+                // 随机选择要留空的位置
+                let emptyPositions = new Set();
+                const minEmpty = Math.min(4, availablePositions.length);
+                const maxEmpty = availablePositions.length;
+                const numberOfEmpty = Math.floor(Math.random() * (maxEmpty - minEmpty + 1)) + minEmpty;
+
+                while (emptyPositions.size < numberOfEmpty) {
+                    const randomIndex = Math.floor(Math.random() * availablePositions.length);
+                    emptyPositions.add(availablePositions[randomIndex].position);
+                }
+
+                mode2EmptyPositions = Array.from(emptyPositions);
+
+                // 填充网格
+                const cells = surroundingGridDiv.querySelectorAll('.grid-cell:not(.center-cell)');
+                cells.forEach(cell => {
+                    const position = cell.dataset.position;
+                    const correctValue = getSurroundingNumber(mode2CenterNum, position);
+
+                    cell.innerHTML = '';
+                    cell.classList.remove('correct', 'incorrect', 'disabled');
+                    cell.style.backgroundColor = '';
+                    cell.style.color = '';
+                    cell.style.cursor = '';
+
+                    if (correctValue !== null) {
+                        if (emptyPositions.has(position)) {
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.dataset.position = position;
+                            input.placeholder = '?';
+                            cell.appendChild(input);
+                            mode2CorrectAnswers[position] = correctValue;
+                            setupInputBehavior(input);
+                        } else {
+                            cell.textContent = correctValue;
+                        }
+                    } else {
+                        cell.textContent = 'X';
+                        cell.classList.add('disabled');
+                        cell.style.backgroundColor = '#eee';
+                        cell.style.color = '#aaa';
+                        cell.style.cursor = 'not-allowed';
+                    }
+                });
+            }
+
+            function getSurroundingNumber(center, position) {
+                const row = Math.ceil(center / 10);
+                const col = center % 10 === 0 ? 10 : center % 10;
+
+                let targetRow = row;
+                let targetCol = col;
+
+                switch (position) {
+                    case 'top-left': targetRow--; targetCol--; break;
+                    case 'top': targetRow--; break;
+                    case 'top-right': targetRow--; targetCol++; break;
+                    case 'left': targetCol--; break;
+                    case 'right': targetCol++; break;
+                    case 'bottom-left': targetRow++; targetCol--; break;
+                    case 'bottom': targetRow++; break;
+                    case 'bottom-right': targetRow++; targetCol++; break;
+                }
+
+                // 检查目标位置是否在百数表边界内
+                if (targetRow >= 1 && targetRow <= 10 && targetCol >= 1 && targetCol <= 10) {
+                    return (targetRow - 1) * 10 + targetCol;
+                }
+                return null;
+            }
+
+            function resetMode2() {
+                mode2Attempts = MAX_ATTEMPTS;
+                mode2ResultDiv.textContent = '';
+                mode2ResultDiv.className = 'result';
+                showAnswerMode2Btn.classList.add('hidden');
+                mode2CorrectAnswers = {};
+                mode2CenterNumSpan.textContent = '';
+                checkMode2Btn.disabled = false;
+
+                // 重置按钮状态
+                nextMode2Btn.disabled = false;
+                restartMode2Btn.disabled = false;
+
+                // 清除网格单元格
+                const cells = surroundingGridDiv.querySelectorAll('.grid-cell:not(.center-cell)');
+                cells.forEach(cell => {
+                    cell.innerHTML = '';
+                    cell.classList.remove('correct', 'incorrect', 'disabled');
+                    cell.style.backgroundColor = '';
+                    cell.style.color = '';
+                    cell.style.cursor = '';
+                });
+            }
+
+            function checkMode2() {
+                if (mode2Attempts <= 0) return;
+
+                const inputs = surroundingGridDiv.querySelectorAll('.grid-cell input[type="text"]');
+
+                // 检查是否全部为空
+                let hasAnyInput = false;
+                inputs.forEach(input => {
+                    if (input.value.trim() !== '') {
+                        hasAnyInput = true;
+                    }
+                });
+
+                if (!hasAnyInput) {
+                    mode2ResultDiv.textContent = '请至少填写一个空白格子！';
+                    mode2ResultDiv.className = 'result warning';
+                    return;
+                }
+
+                let allCorrect = true;
+                let incorrectCount = 0;
+
+                inputs.forEach(input => {
+                    const position = input.dataset.position;
+                    const userAnswer = parseInt(input.value) || 0;
+                    const correctAnswer = mode2CorrectAnswers[position];
+                    const cell = input.parentElement;
+
+                    cell.classList.remove('correct', 'incorrect', 'empty');
+
+                    if (input.value.trim() === '') {
+                        // 未填写 - 黄色
+                        cell.classList.add('empty');
+                        allCorrect = false;
+                        incorrectCount++;
+                    } else if (userAnswer !== correctAnswer) {
+                        // 填写错误 - 红色框+红色数字
+                        cell.classList.add('incorrect');
+                        allCorrect = false;
+                        incorrectCount++;
+                    } else {
+                        // 正确答案 - 绿色框+黑色数字
+                        cell.classList.add('correct');
+                    }
+                });
+
+                if (allCorrect && inputs.length > 0) {
+                    mode2ResultDiv.textContent = '恭喜你，全部正确！';
+                    mode2ResultDiv.className = 'result correct';
+                    checkMode2Btn.disabled = true;
+                    nextMode2Btn.focus();
+                } else if (inputs.length === 0) {
+                    mode2ResultDiv.textContent = '没有需要填写的空位。';
+                    mode2ResultDiv.className = 'result info';
+                } else {
+                    mode2Attempts--;
+
+                    if (mode2Attempts > 0) {
+                        mode2ResultDiv.textContent = `有${incorrectCount}处错误，剩余机会：${mode2Attempts}次`;
+                        mode2ResultDiv.className = 'result incorrect';
+                    } else {
+                        mode2ResultDiv.textContent = '机会已用尽，请查看答案';
+                        mode2ResultDiv.className = 'result incorrect';
+                        checkMode2Btn.disabled = true;
+                        showAnswerMode2Btn.classList.remove('hidden');
+                    }
+                }
+            }
+
+            function showAnswerMode2() {
+                const inputs = surroundingGridDiv.querySelectorAll('.grid-cell input[type="text"]');
+                inputs.forEach(input => {
+                    const position = input.dataset.position;
+                    input.value = mode2CorrectAnswers[position];
+                    const cell = input.parentElement;
+                    cell.classList.remove('incorrect');
+                    cell.classList.add('correct');
+                    input.readOnly = true;
+                });
+                showAnswerMode2Btn.classList.add('hidden');
+            }
+
+            function restartMode2() {
+                // 保留相同的中心数字和留空位置重新开始
+                resetMode2();
+                mode2CenterNumSpan.textContent = mode2CenterNum;
+
+                const cells = surroundingGridDiv.querySelectorAll('.grid-cell:not(.center-cell)');
+                cells.forEach(cell => {
+                    const position = cell.dataset.position;
+                    const correctValue = getSurroundingNumber(mode2CenterNum, position);
+
+                    if (correctValue !== null) {
+                        if (mode2EmptyPositions.includes(position)) {
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.dataset.position = position;
+                            input.placeholder = '?';
+                            cell.appendChild(input);
+                            mode2CorrectAnswers[position] = correctValue;
+                            setupInputBehavior(input);
+                        } else {
+                            cell.textContent = correctValue;
+                        }
+                    } else {
+                        cell.textContent = 'X';
+                        cell.classList.add('disabled');
+                        cell.style.backgroundColor = '#eee';
+                        cell.style.color = '#aaa';
+                        cell.style.cursor = 'not-allowed';
+                    }
+                });
+            }
+
+            // 绑定模式2按钮事件
+            checkMode2Btn.addEventListener('click', checkMode2);
+            showAnswerMode2Btn.addEventListener('click', showAnswerMode2);
+            nextMode2Btn.addEventListener('click', generateMode2);
+            restartMode2Btn.addEventListener('click', restartMode2);
+
+            // 初始化游戏
+            generateHundredChart();
+
+            // 初始化数字键盘
+            setupDigitalKeyboard('keyboard-mode1');
+            setupDigitalKeyboard('keyboard-mode2');
+        });
+    </script>
+</body>
+</html>

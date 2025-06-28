@@ -1,5 +1,5 @@
 import os
-from Config import settings
+from Settings.DeepSeek_Config import settings
 from langchain_deepseek import ChatDeepSeek
 from langchain.prompts import PromptTemplate
 from langchain.schema import BaseOutputParser

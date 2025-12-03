@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>概率实验小游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f8ff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background: #333;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .nav a.active {
+            background: #4CAF50;
+        }
+
+        .nav a:hover {
+            background: #ddd;
+            color: #333;
+        }
+
+        .content {
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .game-container {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .active-game {
+            display: block;
+        }
+
+        /* 硬币游戏样式 */
+        .coin-container {
+            perspective: 1000px;
+            margin: 30px auto;
+            width: 150px;
+            height: 150px;
+        }
+
+        #coin {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.3s cubic-bezier(0.4, 2.3, 0.7, 1);
+        }
+
+        .side {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .front {
+            background-image: url('image/正面.png');
+            transform: rotateX(0deg);
+        }
+
+        .back {
+            background-image: url('image/反面.png');
+            transform: rotateX(180deg);
+        }
+
+        .progress-container {
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .progress-item {
+            margin: 15px 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 25px;
+            background: #f3f3f3;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+        }
+
+        .progress-fill {
+            height: 100%;
+            transition: width 0.3s ease-out;
+        }
+
+        #positiveProgress {
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+        }
+
+        #negativeProgress {
+            background: linear-gradient(90deg, #2196F3, #1976D2);
+        }
+
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        input, button {
+            margin: 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            background: #2196F3;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .history-container {
+            margin-top: 30px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .ratio-bar-container {
+            height: 15px;
+            margin-top: 5px;
+            background-color: #f3f3f3;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ratio-bar-fill {
+            height: 100%;
+            display: flex;
+        }
+
+        .ratio-bar-positive {
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+        }
+
+        .ratio-bar-negative {
+            background: linear-gradient(90deg, #2196F3, #1976D2);
+        }
+
+        .ratio-bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .average-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #FF4500;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* 摸球游戏样式 */
+        .main-container {
+            width: 800px;
+            background: rgba(255,255,255,0.98);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            padding: 30px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .input-panel {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(245,245,245,0.9);
+            border-radius: 12px;
+        }
+
+        .color-input-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .color-picker-wrapper {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .color-preview {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .color-count {
+            position: absolute;
+            top: 60px;  /* 确保在颜色球下方 */
+            left: 25px;  /* 中心对齐 */
+            transform: translateX(-50%);
+            font-weight: bold;
+            font-size: 14px;
+            background: rgba(255,255,255,0.9);
+            padding: 3px 10px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            min-width: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: none; /* 默认不显示计数器 */
+        }
+
+        .experiment-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px auto;
+        }
+
+        .bag-container {
+            width: 200px;
+            height: 240px;
+            margin: 20px auto;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .bag {
+            width: 180px;
+            height: 200px;
+            background: linear-gradient(135deg, #8b5e3c, #6d4c41);
+            border-radius: 10px 10px 80px 80px;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.3), 0 8px 15px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bag:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20px;
+            right: 20px;
+            height: 20px;
+            background: #5d4037;
+            border-radius: 5px;
+        }
+
+        .bag:after {
+            content: '';
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 50%;
+        }
+
+        .drawstring-left, .drawstring-right {
+            position: absolute;
+            top: -15px;
+            width: 80px;
+            height: 30px;
+            border: 3px solid #5d4037;
+            border-bottom: none;
+            border-radius: 40px 40px 0 0;
+        }
+
+        .drawstring-left {
+            left: -20px;
+            transform: rotate(-20deg);
+        }
+
+        .drawstring-right {
+            right: -20px;
+            transform: rotate(20deg);
+        }
+
+        .bag-texture {
+            position: absolute;
+            top: 20px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            opacity: 0.1;
+            background-image: repeating-linear-gradient(45deg, #fff, #fff 5px, transparent 5px, transparent 10px);
+        }
+
+        .current-ball {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: transparent;
+            margin-bottom: -30px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: all 0.3s ease;
+            transform: translateY(30px); /* 初始位置在袋子里面 */
+        }
+
+        /* 修改出现和消失的动画 */
+        .ball-appear {
+            animation: ballUp 0.4s ease-out forwards;
+        }
+
+        .ball-disappear {
+            animation: ballDown 0.4s ease-in forwards;
+        }
+
+        @keyframes ballUp {
+            0% {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(-40px); /* 向上弹出 */
+                opacity: 1;
+            }
+        }
+
+        @keyframes ballDown {
+            0% {
+                transform: translateY(-40px);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+        }
+
+        .progress-container {
+            width: 90%;
+            margin: 20px auto;
+            background: #f8f9fa;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 32px;
+            border-radius: 6px;
+            transition: width 0.3s ease;
+            font-size: 15px;
+            padding: 0 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 140px;
+            font-size: 14px;
+            background: white;
+        }
+
+        button {
+            padding: 10px 25px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+
+        .shake-animation {
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            25% { transform: translateX(-5px) rotate(-3deg); }
+            50% { transform: translateX(5px) rotate(3deg); }
+            75% { transform: translateX(-5px) rotate(-3deg); }
+        }
+
+        .highlight {
+            animation: highlight 0.8s ease;
+        }
+
+        @keyframes highlight {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* 如果屏幕较小，确保容器不会溢出 */
+        @media (max-width: 860px) {
+            .main-container {
+                width: 95%;
+            }
+        }
+
+        .ball-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .ball-display-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ball-display-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .color-balls-display {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 10px;
+            min-height: 30px;
+        }
+
+        .color-ball {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .coin-progress-center-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            background: repeating-linear-gradient(
+                to bottom,
+                red,
+                red 6px,
+                transparent 6px,
+                transparent 12px
+            );
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="nav">
+            <a href="#" class="nav-link active" data-game="coin">抛硬币</a>
+            <a href="#" class="nav-link" data-game="ball">智能摸球</a>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- 抛硬币游戏 -->
+        <div id="coin-game" class="game-container active-game">
+            <h1 style="text-align: center; font-size: 28px; margin-bottom: 20px; color: #333;">抛硬币实验</h1>
+            <div class="control-panel">
+                <div class="input-container">
+                    <div class="input-group">
+                        <span class="input-label">轮数：</span>
+                        <input type="number" id="roundCount" placeholder="1" min="1" value="1">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-label">每轮抛掷次数：</span>
+                        <input type="number" id="tossCount" placeholder="1" min="1" required>
+                    </div>
+
+                    <button onclick="startCoinExperiment()">开始实验</button>
+                    <button onclick="resetCoin()">重置</button>
+                </div>
+
+                <div class="input-container" style="margin-top: 10px;">
+                    <div class="input-group" style="width: 100%; display: flex; justify-content: center;">
+                        <span class="input-label">选择速度：</span>
+                        <label style="margin-right: 20px;">
+                            <input type="radio" name="coinSpeed" value="slow" checked onclick="setCoinSpeed('slow')"> 慢速抛
+                        </label>
+                        <label>
+                            <input type="radio" name="coinSpeed" value="fast" onclick="setCoinSpeed('fast')"> 快速抛
+                        </label>
+                    </div>
+                </div>
+
+                <div class="coin-container">
+                    <div id="coin">
+                        <div class="side front">
+                            <div class="front-content"></div>
+                        </div>
+                        <div class="side back">
+                            <div class="back-content"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-item">
+                        <div class="progress-label">
+                            <span>正面：<span id="positiveCount">0</span></span>
+                            <span>反面：<span id="negativeCount">0</span></span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="positiveProgress"></div>
+                            <div class="progress-fill" id="negativeProgress"></div>
+                            <div class="coin-progress-center-line"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="history-container">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>抛掷次数</th>
+                                <th>正反面比例</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <!-- 历史记录将在这里动态添加 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 智能摸球游戏 -->
+        <div id="ball-game" class="game-container">
+            <h1 style="text-align: center; font-size: 28px; margin-bottom: 20px; color: #333;">摸球实验——可能性</h1>
+            <div class="main-container">
+                <div class="input-panel">
+                    <div class="input-group">
+                        <span style="min-width:80px">颜色种类：</span>
+                        <input type="number" id="colorCount" min="1" max="6">
+                        <button onclick="createColorInputs()">确认颜色</button>
+                    </div>
+                    <div id="colorInputs"></div>
+                    <div id="ballDisplayContainer" class="ball-display"></div>
+                    <div class="input-group" style="margin-top:25px">
+                        <span style="min-width:80px">摸球次数：</span>
+                        <input type="number" id="totalTries" min="1">
+                        <button onclick="startBallExperiment()">开始实验</button>
+                        <button onclick="resetAll()" style="background:#ff6b6b">重置</button>
+                    </div>
+                    <div class="input-group" style="width: 100%; display: flex; justify-content: center; margin-top: 10px;">
+                        <span class="input-label">选择速度：</span>
+                        <label style="margin-right: 20px;">
+                            <input type="radio" name="ballSpeed" value="slow" checked onclick="setBallSpeed('slow')"> 慢速摸
+                        </label>
+                        <label>
+                            <input type="radio" name="ballSpeed" value="fast" onclick="setBallSpeed('fast')"> 快速摸
+                        </label>
+                    </div>
+                </div>
+
+                <div class="experiment-area">
+                    <div class="current-ball" id="currentBall"></div>
+                    <div class="bag-container" id="bagContainer">
+                        <div class="bag">
+                            <div class="drawstring-left"></div>
+                            <div class="drawstring-right"></div>
+                            <div class="bag-texture"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="progressBars"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 导航切换功能
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // 更新导航样式
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+
+                // 切换游戏显示
+                const gameId = this.getAttribute('data-game');
+                document.querySelectorAll('.game-container').forEach(game => {
+                    game.classList.remove('active-game');
+                });
+
+                const targetGame = document.getElementById(`${gameId}-game`);
+                targetGame.classList.add('active-game');
+            });
+        });
+
+        // 硬币游戏逻辑
+        let coinAnimationQueue = [];
+        let coinIsAnimating = false;
+        let coinTotalToss = 0;
+        let coinPositive = 0;
+        let coinNegative = 0;
+        let coinExperimentHistory = [];
+        let coinCurrentRound = 0;
+        let coinTotalRounds = 0;
+        let coinTossesPerRound = 0;
+        let coinCurrentRoundPositive = 0;
+        let coinCurrentRoundNegative = 0;
+        let coinSequenceNumber = 0;
+        let coinAnimationSpeed = 200; // 默认动画速度，单位为毫秒
+        let coinTransitionDelay = 150; // 默认过渡延迟，单位为毫秒
+
+        function setCoinSpeed(speed) {
+            if (speed === 'slow') {
+                coinAnimationSpeed = 200;
+                coinTransitionDelay = 150;
+            } else if (speed === 'fast') {
+                coinAnimationSpeed = 50;
+                coinTransitionDelay = 20;
+            }
+        }
+
+        function startCoinExperiment() {
+            const tossCountPerRound = parseInt(document.getElementById('tossCount').value) || 0;
+            const rounds = parseInt(document.getElementById('roundCount').value) || 1;
+
+            if (tossCountPerRound < 1) return alert("请输入有效次数");
+
+            coinTotalRounds = rounds;
+            coinTossesPerRound = tossCountPerRound;
+            coinTotalToss = coinTossesPerRound * coinTotalRounds;
+            coinPositive = 0;
+            coinNegative = 0;
+            coinCurrentRound = 0;
+            coinCurrentRoundPositive = 0;
+            coinCurrentRoundNegative = 0;
+
+            updateCoinDisplay();
+            startNextCoinRound();
+        }
+
+        function startNextCoinRound() {
+            if (coinCurrentRound >= coinTotalRounds) return;
+
+            coinCurrentRound++;
+            coinCurrentRoundPositive = 0;
+            coinCurrentRoundNegative = 0;
+
+            coinAnimationQueue = Array(coinTossesPerRound).fill(null);
+            processCoinQueue();
+        }
+
+        function processCoinQueue() {
+            if (coinAnimationQueue.length === 0 || coinIsAnimating) return;
+
+            coinIsAnimating = true;
+            const result = Math.random() < 0.5 ? '正' : '反';
+
+            animateCoin(result, () => {
+                updateCoinResults(result);
+                coinAnimationQueue.pop();
+                coinIsAnimating = false;
+
+                if (coinAnimationQueue.length > 0) {
+                    setTimeout(processCoinQueue, coinTransitionDelay);
+                } else {
+                    saveCoinRoundResult();
+
+                    if (coinCurrentRound < coinTotalRounds) {
+                        setTimeout(startNextCoinRound, 250);
+                    }
+                }
+            });
+        }
+
+        function animateCoin(result, callback) {
+            const coin = document.getElementById('coin');
+            const rotation = result === '正' ? 1080 : 1260;
+
+            coin.style.transition = 'none';
+            coin.style.transform = 'rotateX(0deg)';
+            void coin.offsetWidth;
+            coin.style.transition = `transform ${coinAnimationSpeed/1000}s cubic-bezier(0.4, 2.3, 0.7, 1)`;
+            coin.style.transform = `rotateX(${rotation}deg)`;
+            coin.addEventListener('transitionend', function handler() {
+                coin.removeEventListener('transitionend', handler);
+                callback();
+            }, { once: true });
+        }
+
+        function updateCoinResults(result) {
+            if (result === '正') {
+                coinPositive++;
+                coinCurrentRoundPositive++;
+            } else {
+                coinNegative++;
+                coinCurrentRoundNegative++;
+            }
+            updateCoinDisplay();
+        }
+
+        function updateCoinDisplay() {
+            document.getElementById('positiveCount').textContent = coinPositive;
+            document.getElementById('negativeCount').textContent = coinNegative;
+
+            const total = coinPositive + coinNegative;
+            if (total > 0) {
+                document.getElementById('positiveProgress').style.width =
+                    `${(coinPositive / total * 100).toFixed(1)}%`;
+                document.getElementById('negativeProgress').style.width =
+                    `${(coinNegative / total * 100).toFixed(1)}%`;
+            } else {
+                document.getElementById('positiveProgress').style.width = '0%';
+                document.getElementById('negativeProgress').style.width = '0%';
+            }
+        }
+
+        function saveCoinRoundResult() {
+            coinSequenceNumber++;
+
+            const roundResult = {
+                sequence: coinSequenceNumber,
+                tossCount: coinTossesPerRound,
+                positive: coinCurrentRoundPositive,
+                negative: coinCurrentRoundNegative
+            };
+
+            coinExperimentHistory.push(roundResult);
+            updateCoinHistoryTable();
+        }
+
+        function updateCoinHistoryTable() {
+            const tbody = document.getElementById('historyBody');
+            tbody.innerHTML = '';
+
+            coinExperimentHistory.forEach(round => {
+                const row = document.createElement('tr');
+
+                const sequenceCell = document.createElement('td');
+                sequenceCell.textContent = round.sequence;
+
+                const tossCell = document.createElement('td');
+                tossCell.textContent = round.tossCount;
+
+                const ratioCell = document.createElement('td');
+                const totalRound = round.positive + round.negative;
+
+                if (totalRound > 0) {
+                    const positiveRatio = (round.positive / totalRound * 100).toFixed(1);
+                    const negativeRatio = (round.negative / totalRound * 100).toFixed(1);
+
+                    ratioCell.innerHTML = `
+                        <div class="ratio-bar-container">
+                            <div class="ratio-bar-fill">
+                                <div class="ratio-bar-positive" style="width: ${positiveRatio}%"></div>
+                                <div class="ratio-bar-negative" style="width: ${negativeRatio}%"></div>
+                            </div>
+                            <div class="average-line"></div>
+                        </div>
+                        <div class="ratio-bar-labels">
+                            <span>正面: ${round.positive}</span>
+                            <span>反面: ${round.negative}</span>
+                        </div>
+                    `;
+                } else {
+                    ratioCell.innerHTML = `
+                        <div class="ratio-bar-container">
+                            <div class="average-line"></div>
+                        </div>
+                        <div class="ratio-bar-labels">
+                            <span>正面: 0</span>
+                            <span>反面: 0</span>
+                        </div>
+                    `;
+                }
+
+                row.appendChild(sequenceCell);
+                row.appendChild(tossCell);
+                row.appendChild(ratioCell);
+
+                tbody.appendChild(row);
+            });
+        }
+
+        function resetCoin() {
+            coinAnimationQueue = [];
+            coinIsAnimating = false;
+            document.getElementById('tossCount').value = '';
+            document.getElementById('roundCount').value = 1;
+            document.getElementById('coin').style.transform = "rotateX(0deg)";
+
+            coinPositive = 0;
+            coinNegative = 0;
+            coinCurrentRound = 0;
+            coinCurrentRoundPositive = 0;
+            coinCurrentRoundNegative = 0;
+            coinExperimentHistory = [];
+            coinSequenceNumber = 0;
+
+            updateCoinHistoryTable();
+            updateCoinDisplay();
+        }
+
+        // 智能摸球游戏逻辑
+        const colorNames = {
+            '#ff0000': '红色',
+            '#00ff00': '绿色',
+            '#0000ff': '蓝色',
+            '#ffff00': '黄色',
+            '#ff00ff': '品红',
+            '#00ffff': '青色',
+            '#ffa500': '橙色'
+        };
+
+        let ballColorPool = [];
+        let ballColorData = {};
+        let ballColorToIndexMap = {};
+        let ballCurrentTries = 0;
+        let ballTotalAttempts = 0;
+        let ballIsRunning = false;
+        let ballSimulationInterval = null;
+        let ballDrawSpeed = 1000; // 默认慢速
+        let ballDrawDelay = 250; // 默认慢速
+
+        function setBallSpeed(speed) {
+            if (speed === 'slow') {
+                ballDrawSpeed = 1000;
+                ballDrawDelay = 250;
+            } else if (speed === 'fast') {
+                ballDrawSpeed = 200;
+                ballDrawDelay = 50;
+            }
+        }
+
+        function createColorInputs() {
+            const count = parseInt(document.getElementById('colorCount').value);
+            if (isNaN(count) || count <= 0 || count > 6) {
+                alert('请输入1-6之间的颜色种类数！');
+                return;
+            }
+
+            let html = '<div class="color-inputs-group" style="display:flex;flex-wrap:wrap;gap:15px">';
+            for(let i=0; i<count; i++){
+                const defaultColor = getDefaultColor(i);
+                html += `
+                    <div class="color-input-group">
+                        <div class="input-group">
+                            <div class="color-picker-wrapper" id="colorWrapper${i}">
+                                <input type="color" class="colorInput" data-index="${i}" value="${defaultColor}">
+                                <div class="color-preview" style="background:${defaultColor}"></div>
+                            </div>
+                            <input type="number" class="countInput" data-index="${i}" min="1" placeholder="数量" style="width:100px">
+                        </div>
+                        <div class="color-count" id="count${i}">0次</div>
+                        <div class="color-balls-display" id="ballsDisplay${i}"></div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            document.getElementById('colorInputs').innerHTML = html;
+
+            document.querySelectorAll('.colorInput').forEach(input => {
+                input.addEventListener('input', function() {
+                    const colorIndex = this.getAttribute('data-index');
+                    this.parentElement.querySelector('.color-preview').style.background = this.value;
+                });
+            });
+
+            // 为数量输入框添加事件，实时更新小球显示
+            document.querySelectorAll('.countInput').forEach(input => {
+                input.addEventListener('input', function() {
+                    const colorIndex = this.getAttribute('data-index');
+                    const colorInput = document.querySelector(`.colorInput[data-index="${colorIndex}"]`);
+                    const count = parseInt(this.value) || 0;
+                    const color = colorInput.value;
+
+                    updateBallsDisplay(colorIndex, color, count);
+                });
+            });
+        }
+
+        function getDefaultColor(index) {
+            const colorCount = parseInt(document.getElementById('colorCount').value);
+            if (colorCount === 2) {
+                return ['#ff0000', '#0000ff'][index] || '#ffffff';
+            }
+            const defaultColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            return defaultColors[index] || '#ffffff';
+        }
+
+        function updateBallsDisplay(index, color, count) {
+            const displayContainer = document.getElementById(`ballsDisplay${index}`);
+            let ballsHtml = '';
+
+            for (let i = 0; i < count; i++) {
+                ballsHtml += `<div class="color-ball" style="background:${color}"></div>`;
+            }
+
+            displayContainer.innerHTML = ballsHtml;
+        }
+
+        function startBallExperiment() {
+            if(ballIsRunning) return;
+            resetBallExperiment();
+
+            const colorInputs = document.querySelectorAll('.colorInput');
+            const countInputs = document.querySelectorAll('.countInput');
+            ballColorPool = [];
+            ballColorData = {};
+            ballColorToIndexMap = {};
+
+            colorInputs.forEach((input, index) => {
+                const color = input.value.toLowerCase();
+                const count = parseInt(countInputs[index].value) || 0;
+
+                if(color && count > 0) {
+                    ballColorPool.push(...Array(count).fill(color));
+                    ballColorToIndexMap[color] = index;
+                    ballColorData[color] = {
+                        count: 0,
+                        name: colorNames[color] || `颜色${index+1}`,
+                        hex: color,
+                        index: index
+                    };
+
+                    // 重置计数器
+                    const countElement = document.getElementById(`count${index}`);
+                    if (countElement) {
+                        countElement.textContent = '0次';
+                    }
+                }
+            });
+
+            if(ballColorPool.length === 0) {
+                alert('请先配置颜色和数量！');
+                return;
+            }
+
+            initBallProgressBars();
+            ballTotalAttempts = parseInt(document.getElementById('totalTries').value) || 0;
+
+            if(ballTotalAttempts <= 0) {
+                alert('请输入有效的摸球次数！');
+                return;
+            }
+
+            ballIsRunning = true;
+            ballCurrentTries = 0;
+            simulateDrawing();
+        }
+
+        function initBallProgressBars() {
+            const container = document.getElementById('progressBars');
+            container.innerHTML = '';
+
+            Object.values(ballColorData).forEach(data => {
+                const bar = document.createElement('div');
+                bar.innerHTML = `
+                    <div class="progress-container">
+                        <div class="progress-bar" id="${data.name}Bar"
+                             style="width:0%;background:${data.hex}">
+                            ${data.name}：0次
+                        </div>
+                    </div>
+                `;
+                container.appendChild(bar);
+            });
+        }
+
+        function simulateDrawing() {
+            clearInterval(ballSimulationInterval);
+            ballSimulationInterval = setInterval(() => {
+                if(ballCurrentTries >= ballTotalAttempts) {
+                    clearInterval(ballSimulationInterval);
+                    ballIsRunning = false;
+                    return;
+                }
+
+                // 添加袋子摇动效果
+                const bag = document.getElementById('bagContainer');
+                bag.classList.add('shake-animation');
+
+                setTimeout(() => {
+                    bag.classList.remove('shake-animation');
+
+                    // 随机选择一个球
+                    const randomIndex = Math.floor(Math.random() * ballColorPool.length);
+                    const selectedColor = ballColorPool[randomIndex];
+                    ballColorData[selectedColor].count++;
+                    ballCurrentTries++;
+
+                    // 显示当前选中的球并添加出现动画
+                    const currentBall = document.getElementById('currentBall');
+                    currentBall.style.background = selectedColor;
+                    currentBall.style.opacity = 1;
+                    currentBall.classList.remove('ball-disappear'); // 确保移除之前的动画
+                    currentBall.classList.add('ball-appear');
+
+                    // 立即更新颜色计数和进度条
+                    updateColorCount(selectedColor);
+                    updateAllProgressBars();
+
+                    // 球消失的效果（模拟落回袋子）
+                    setTimeout(() => {
+                        currentBall.classList.remove('ball-appear');
+                        currentBall.classList.add('ball-disappear');
+                    }, ballDrawDelay * 2.4);
+
+                }, ballDrawDelay);
+            }, ballDrawSpeed); // 调整间隔时间以配合动画
+        }
+
+        function updateColorCount(selectedColor) {
+            const colorIndex = ballColorToIndexMap[selectedColor];
+            const countElement = document.getElementById(`count${colorIndex}`);
+
+            if (countElement) {
+                // 更新计数显示（不显示在上方，只在下方显示）
+                countElement.textContent = `${ballColorData[selectedColor].count}次`;
+
+                // 高亮对应的颜色球
+                const colorWrapper = document.getElementById(`colorWrapper${colorIndex}`);
+                if (colorWrapper) {
+                    colorWrapper.classList.remove('highlight');
+                    void colorWrapper.offsetWidth;
+                    colorWrapper.classList.add('highlight');
+                }
+            }
+        }
+
+        function updateAllProgressBars() {
+            let maxCount = 0;
+            Object.values(ballColorData).forEach(data => {
+                if(data.count > maxCount) {
+                    maxCount = data.count;
+                }
+            });
+
+            Object.values(ballColorData).forEach(data => {
+                const bar = document.getElementById(`${data.name}Bar`);
+                if (bar) {
+                    const percentage = maxCount === 0 ? 0 : (data.count / maxCount * 100).toFixed(1);
+                    bar.style.width = percentage + '%';
+                    bar.innerHTML = `${data.name}：${data.count}次`;
+                }
+            });
+        }
+
+        function resetAll() {
+            clearInterval(ballSimulationInterval);
+            ballIsRunning = false;
+            ballCurrentTries = 0;
+            ballColorPool = [];
+            ballColorData = {};
+            ballColorToIndexMap = {};
+            document.getElementById('colorCount').value = '';
+            document.getElementById('totalTries').value = '';
+            document.getElementById('colorInputs').innerHTML = '';
+            document.getElementById('progressBars').innerHTML = '';
+            document.getElementById('currentBall').style.opacity = 0;
+        }
+
+        function resetBallExperiment() {
+            clearInterval(ballSimulationInterval);
+            ballIsRunning = false;
+            ballCurrentTries = 0;
+            document.getElementById('progressBars').innerHTML = '';
+            document.getElementById('currentBall').style.opacity = 0;
+
+            // 重置所有计数器
+            document.querySelectorAll('.color-count').forEach(element => {
+                element.textContent = '0次';
+            });
+        }
+    </script>
+</body>
+</html>

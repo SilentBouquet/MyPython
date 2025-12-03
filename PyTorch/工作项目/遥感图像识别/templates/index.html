@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>遥感图像目标检测系统</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../static/css/main.css">
+  <link rel="stylesheet" href="../static/css/index.css">
+  <style>
+    /* 用户头像名字首字母样式 */
+    .author-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #2A5CAA;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 李明的头像样式 */
+    .testimonial-slide:nth-child(1) .author-avatar {
+      background-color: #2A5CAA;
+    }
+
+    /* 王丽的头像样式 */
+    .testimonial-slide:nth-child(2) .author-avatar {
+      background-color: #FF6B35;
+    }
+
+    /* 张伟的头像样式 */
+    .testimonial-slide:nth-child(3) .author-avatar {
+      background-color: #00C49A;
+    }
+
+    /* 页面全局背景 */
+    body.landing-page {
+      overflow-x: hidden;
+      background: linear-gradient(135deg, #0f1218 0%, #1c2530 100%);
+      position: relative;
+    }
+
+    body.landing-page:before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('../static/img/earth-bg.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      opacity: 0.15;
+      z-index: -1;
+    }
+
+    /* 修改hero部分样式 */
+    .hero-image {
+      flex: 0 0 60%; /* 进一步增加图片所占比例 */
+      position: relative;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-width: none; /* 移除最大宽度限制 */
+    }
+
+    .satellite-image {
+      width: 100%;
+      max-width: 700px; /* 增大最大宽度 */
+      height: auto;
+      position: relative;
+      z-index: 2;
+      border-radius: 10px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      animation: none !important; /* 确保没有任何动画效果 */
+      transform: none !important; /* 确保没有任何变换 */
+    }
+
+    /* 确保没有浮动元素动画效果 */
+    .floating-element {
+      position: absolute;
+      background: rgba(42, 92, 170, 0.7);
+      border-radius: 50%;
+      z-index: 1;
+      animation: none !important; /* 彻底移除动画 */
+      transform: none !important; /* 确保没有任何变换 */
+    }
+
+    .elem1 {
+      width: 80px;
+      height: 80px;
+      top: 15%;
+      left: 10%;
+      background: rgba(255, 107, 53, 0.7);
+    }
+
+    .elem2 {
+      width: 60px;
+      height: 60px;
+      bottom: 20%;
+      left: 15%;
+    }
+
+    .elem3 {
+      width: 40px;
+      height: 40px;
+      top: 30%;
+      right: 15%;
+      background: rgba(0, 196, 154, 0.7);
+    }
+
+    .orbit {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px dashed rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 991px) {
+      .hero-content {
+        flex-direction: column;
+      }
+
+      .hero-image {
+        margin-top: 40px;
+        flex: 0 0 auto;
+      }
+
+      .satellite-image {
+        max-width: 90%;
+      }
+    }
+
+    /* 功能卡片样式修改 */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .feature-card {
+      background: rgba(42, 92, 170, 0.1);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .feature-card h3 {
+      color: rgba(255, 255, 255, 0.9);
+      margin: 15px 0;
+      font-size: 20px;
+    }
+
+    .feature-card p {
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .feature-icon {
+      margin-bottom: 20px;
+      width: 80px;
+      height: 80px;
+    }
+
+    .feature-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 工作流程样式 */
+    .workflow-steps {
+      margin-top: 50px;
+      position: relative;
+    }
+
+    .workflow-step {
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 50px;
+      align-items: center;
+      background: rgba(42, 92, 170, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      position: relative;
+    }
+
+    .step-number {
+      position: absolute;
+      left: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #2A5CAA;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-content {
+      padding: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 15px;
+      margin-left: 70px;
+      margin-right: 30px;
+    }
+
+    .step-content h3 {
+      margin: 0;
+      font-size: 22px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .step-content p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+      max-width: 80%;
+    }
+
+    .step-image {
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 15px;
+    }
+
+    @media (max-width: 768px) {
+      .workflow-step {
+        flex-direction: column;
+        align-items: center;
+        padding: 90px 20px 20px;
+      }
+
+      .step-number {
+        left: 50%;
+        top: 30px;
+        transform: translateX(-50%);
+      }
+
+      .step-content {
+        margin-left: 0;
+        margin-right: 0;
+        align-items: center;
+        text-align: center;
+      }
+
+      .step-content p {
+        max-width: 95%;
+      }
+    }
+  </style>
+</head>
+<body class="landing-page">
+  <!-- 顶部导航 -->
+  <nav class="navbar transparent">
+    <div class="navbar-brand">
+      <img src="../static/img/logo.svg" alt="遥感图像目标检测系统">
+      <h1>遥感图像目标检测系统</h1>
+    </div>
+
+    <div class="navbar-menu">
+      <a href="#features" class="nav-link">功能</a>
+      <a href="#workflow" class="nav-link">工作流程</a>
+      <a href="#models" class="nav-link">模型中心</a>
+      <a href="#testimonials" class="nav-link">用户评价</a>
+      <a href="login.html" class="btn btn-outline">登录</a>
+      <a href="register.html" class="btn btn-primary">注册</a>
+    </div>
+
+    <button class="mobile-toggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+
+  <!-- 英雄区域 -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">智能<span class="highlight">遥感</span>图像识别平台</h1>
+        <p class="hero-subtitle">通过先进的深度学习技术，高效处理和分析遥感影像，<br>助力科研、环境监测和城市规划</p>
+        <div class="hero-buttons">
+          <a href="register.html" class="btn btn-primary btn-lg">开始使用</a>
+          <a href="#features" class="btn btn-outline btn-lg">了解更多</a>
+        </div>
+      </div>
+
+      <div class="hero-image">
+        <img src="../static/img/hero-satellite.png" alt="卫星影像处理" class="satellite-image" style="animation: none; transform: none;">
+        <div class="floating-element elem1" style="animation: none; transform: none;"></div>
+        <div class="floating-element elem2" style="animation: none; transform: none;"></div>
+        <div class="floating-element elem3" style="animation: none; transform: none;"></div>
+        <div class="orbit" style="animation: none; transform: translate(-50%, -50%);"></div>
+      </div>
+    </div>
+
+    <div class="scroll-indicator">
+      <span>向下滚动</span>
+      <i class="icon-chevron-down"></i>
+    </div>
+  </section>
+
+  <!-- 特点区域 -->
+  <section class="section features-section" id="features">
+    <div class="section-header">
+      <h2>核心功能</h2>
+      <p>专为遥感图像识别和分析设计的全面解决方案</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="eye-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#2A5CAA"/>
+                <stop offset="100%" stop-color="#1E88E5"/>
+              </linearGradient>
+            </defs>
+            <path d="M12,5C7,5 2.73,8.11 1,12C2.73,15.89 7,19 12,19C17,19 21.27,15.89 23,12C21.27,8.11 17,5 12,5Z" fill="none" stroke="url(#eye-gradient)" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="3" fill="url(#eye-gradient)"/>
+            <path d="M12,8.5V9.5M12,14.5V15.5M8.5,12H9.5M14.5,12H15.5" stroke="url(#eye-gradient)" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>多类别识别</h3>
+        <p>支持水体、植被、建筑等多种地物类别的精准识别，满足不同应用场景需求</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="cube-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#2A5CAA"/>
+                <stop offset="100%" stop-color="#1E88E5"/>
+              </linearGradient>
+            </defs>
+            <path d="M12,2L22,7V17L12,22L2,17V7L12,2Z" fill="none" stroke="url(#cube-gradient)" stroke-width="1.5"/>
+            <path d="M12,2V22M2,7L12,12L22,7" stroke="url(#cube-gradient)" stroke-width="1.5" fill="none"/>
+            <path d="M7,4.5L17,9.5" stroke="url(#cube-gradient)" stroke-width="1.5" stroke-dasharray="1,1"/>
+          </svg>
+        </div>
+        <h3>自定义模型</h3>
+        <p>允许用户上传和使用自己训练的模型，为特定任务提供更精准的识别结果</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="history-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#2A5CAA"/>
+                <stop offset="100%" stop-color="#1E88E5"/>
+              </linearGradient>
+            </defs>
+            <circle cx="12" cy="12" r="10" stroke="url(#history-gradient)" stroke-width="1.5" fill="none"/>
+            <polyline points="12,7 12,12 16,14" stroke="url(#history-gradient)" stroke-width="1.5" fill="none"/>
+            <path d="M7.5,5.5L9,4M16.5,5.5L15,4" stroke="url(#history-gradient)" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>历史记录</h3>
+        <p>全面记录并可视化展示处理历史，支持时间序列比较和变化检测分析</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="download-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#2A5CAA"/>
+                <stop offset="100%" stop-color="#1E88E5"/>
+              </linearGradient>
+            </defs>
+            <path d="M12,3V16M7,12L12,17L17,12" stroke="url(#download-gradient)" stroke-width="1.5" fill="none"/>
+            <path d="M3,20H21" stroke="url(#download-gradient)" stroke-width="1.5"/>
+            <path d="M6,16H18" stroke="url(#download-gradient)" stroke-width="1.5" stroke-dasharray="1,1"/>
+          </svg>
+        </div>
+        <h3>结果导出</h3>
+        <p>支持多种格式导出处理结果，包括GeoTIFF、Shapefile等，便于与其他GIS软件对接</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 工作流程 -->
+  <section class="section workflow-section" id="workflow">
+    <div class="section-header">
+      <h2>简单高效的工作流程</h2>
+      <p>从上传到分析，一站式解决方案</p>
+    </div>
+
+    <div class="workflow-steps">
+      <div class="workflow-step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>上传遥感图像</h3>
+          <p>支持拖拽上传多种格式的遥感图像，系统自动解析元数据</p>
+          <div class="step-image">
+            <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="320" height="180" rx="8" fill="#f5f8ff"/>
+              <rect x="40" y="30" width="240" height="120" rx="6" stroke="#2A5CAA" stroke-width="2" stroke-dasharray="5,5" fill="none"/>
+              <path d="M160,65 L160,105 M140,85 L160,105 L180,85" stroke="#2A5CAA" stroke-width="2"/>
+              <text x="160" y="125" text-anchor="middle" fill="#2A5CAA" font-size="14">点击或拖拽文件上传</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="workflow-step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>选择识别模型</h3>
+          <p>使用系统内置的高精度模型，或上传自定义模型进行处理</p>
+          <div class="step-image">
+            <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="320" height="180" rx="8" fill="#f5f8ff"/>
+              <rect x="20" y="20" width="100" height="140" rx="5" fill="#fff" stroke="#ddd"/>
+              <rect x="30" y="40" width="80" height="20" rx="3" fill="#2A5CAA"/>
+              <rect x="30" y="70" width="80" height="20" rx="3" fill="#e9ecef"/>
+              <rect x="30" y="100" width="80" height="20" rx="3" fill="#e9ecef"/>
+              <rect x="140" y="20" width="160" height="140" rx="5" fill="#fff" stroke="#ddd"/>
+              <rect x="150" y="30" width="140" height="20" rx="3" fill="#2A5CAA"/>
+              <rect x="150" y="60" width="140" height="90" rx="3" fill="#f8f9fa"/>
+              <circle cx="165" cy="85" r="5" fill="#2A5CAA"/>
+              <text x="180" y="90" fill="#666" font-size="12">土地覆盖分类模型</text>
+              <circle cx="165" cy="115" r="5" fill="#2A5CAA"/>
+              <text x="180" y="120" fill="#666" font-size="12">建筑物识别模型</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="workflow-step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>执行识别处理</h3>
+          <p>系统快速执行图像识别与分析，实时显示处理进度</p>
+          <div class="step-image">
+            <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="320" height="180" rx="8" fill="#f5f8ff"/>
+              <rect x="40" y="40" width="240" height="25" rx="5" fill="#f8f9fa" stroke="#ddd"/>
+              <rect x="40" y="40" width="160" height="25" rx="5" fill="#2A5CAA"/>
+              <text x="160" y="57" text-anchor="middle" fill="#fff" font-size="12">处理中... 67%</text>
+              <rect x="40" y="80" width="240" height="70" rx="5" fill="#fff" stroke="#ddd"/>
+              <path d="M60,100 L90,120 L120,90 L150,130 L180,110 L210,125 L240,105" stroke="#2A5CAA" stroke-width="2" fill="none"/>
+              <circle cx="90" cy="120" r="3" fill="#2A5CAA"/>
+              <circle cx="150" cy="130" r="3" fill="#2A5CAA"/>
+              <circle cx="210" cy="125" r="3" fill="#2A5CAA"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="workflow-step">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h3>查看分析结果</h3>
+          <p>直观展示识别结果，提供详细的数据统计和可视化分析</p>
+          <div class="step-image">
+            <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="320" height="180" rx="8" fill="#f5f8ff"/>
+              <rect x="20" y="20" width="170" height="140" rx="5" fill="#f8f9fa" stroke="#ddd"/>
+              <rect x="30" y="30" width="150" height="120" fill="#fff"/>
+              <path d="M40,125 L180,125" stroke="#ddd"/>
+              <path d="M40,125 L40,40" stroke="#ddd"/>
+              <rect x="50" y="60" width="20" height="65" fill="#2A5CAA"/>
+              <rect x="80" y="80" width="20" height="45" fill="#4CAF50"/>
+              <rect x="110" y="50" width="20" height="75" fill="#FF6B35"/>
+              <rect x="140" y="95" width="20" height="30" fill="#9C27B0"/>
+              <rect x="210" y="20" width="90" height="140" rx="5" fill="#f8f9fa" stroke="#ddd"/>
+              <circle cx="255" cy="50" r="25" fill="none" stroke="#ddd" stroke-width="5"/>
+              <path d="M255,50 m0,-20 a20,20 0 0,1 17.32,10" stroke="#2A5CAA" stroke-width="5" fill="none"/>
+              <path d="M255,50 m17.32,10 a20,20 0 0,1 -34.64,0" stroke="#4CAF50" stroke-width="5" fill="none"/>
+              <path d="M255,50 m-17.32,10 a20,20 0 0,1 0,-20" stroke="#FF6B35" stroke-width="5" fill="none"/>
+              <text x="255" y="100" text-anchor="middle" fill="#666" font-size="10">统计结果</text>
+              <text x="255" y="115" text-anchor="middle" fill="#666" font-size="10">水体: 45%</text>
+              <text x="255" y="130" text-anchor="middle" fill="#666" font-size="10">植被: 30%</text>
+              <text x="255" y="145" text-anchor="middle" fill="#666" font-size="10">建筑: 25%</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 模型中心 -->
+  <section class="section models-section" id="models">
+    <div class="section-header">
+      <h2>强大的模型中心</h2>
+      <p>预训练模型与自定义模型的完美结合</p>
+    </div>
+
+    <div class="models-container">
+      <div class="model-categories">
+        <button class="category-btn active" data-category="all">全部模型</button>
+        <button class="category-btn" data-category="landcover">土地覆盖</button>
+        <button class="category-btn" data-category="urban">城市分析</button>
+        <button class="category-btn" data-category="water">水体监测</button>
+        <button class="category-btn" data-category="vegetation">植被分析</button>
+      </div>
+
+      <div class="models-grid">
+        <div class="model-card" data-category="landcover">
+          <div class="model-image">
+            <img src="../static/img/model-landcover.jpg" alt="土地覆盖分类">
+            <div class="model-overlay">
+              <span class="model-accuracy">精度: 94.8%</span>
+              <a href="#" class="model-action">查看详情</a>
+            </div>
+          </div>
+          <div class="model-info">
+            <h3>多类别土地覆盖分类</h3>
+            <p>基于ResNet50架构，支持7种主要地物类别的精准分类</p>
+            <div class="model-meta">
+              <span><i class="icon-download"></i> 1,230次使用</span>
+              <span><i class="icon-star"></i> 4.9分</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="model-card" data-category="urban">
+          <div class="model-image">
+            <img src="../static/img/model-building.jpg" alt="建筑物提取">
+            <div class="model-overlay">
+              <span class="model-accuracy">精度: 93.2%</span>
+              <a href="#" class="model-action">查看详情</a>
+            </div>
+          </div>
+          <div class="model-info">
+            <h3>建筑物精准提取</h3>
+            <p>专为城市规划设计，能够精确提取不同类型建筑物轮廓</p>
+            <div class="model-meta">
+              <span><i class="icon-download"></i> 985次使用</span>
+              <span><i class="icon-star"></i> 4.8分</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="model-card" data-category="water">
+          <div class="model-image">
+            <img src="../static/img/model-water.jpg" alt="水体监测">
+            <div class="model-overlay">
+              <span class="model-accuracy">精度: 95.6%</span>
+              <a href="#" class="model-action">查看详情</a>
+            </div>
+          </div>
+          <div class="model-info">
+            <h3>水体变化监测</h3>
+            <p>结合多时相遥感影像，精确监测和分析水体面积变化趋势</p>
+            <div class="model-meta">
+              <span><i class="icon-download"></i> 752次使用</span>
+              <span><i class="icon-star"></i> 4.7分</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="model-card" data-category="vegetation">
+          <div class="model-image">
+            <img src="../static/img/model-vegetation.jpg" alt="植被分析">
+            <div class="model-overlay">
+              <span class="model-accuracy">精度: 92.8%</span>
+              <a href="#" class="model-action">查看详情</a>
+            </div>
+          </div>
+          <div class="model-info">
+            <h3>植被健康评估</h3>
+            <p>基于多波段数据分析植被覆盖度和健康状况，支持农业监测</p>
+            <div class="model-meta">
+              <span><i class="icon-download"></i> 631次使用</span>
+              <span><i class="icon-star"></i> 4.6分</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 用户评价 -->
+  <section class="section testimonials-section" id="testimonials">
+    <div class="section-header">
+      <h2>用户评价</h2>
+      <p>听听专业用户的真实反馈</p>
+    </div>
+
+    <div class="testimonials-slider">
+      <div class="testimonial-slide active">
+        <div class="testimonial-content">
+          <div class="quote-icon"><i class="icon-quote-left"></i></div>
+          <p class="testimonial-text">这个系统极大地提高了我们团队处理遥感图像的效率。自定义模型功能让我们能够针对特定研究区域开发更精确的识别模型。</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">李</div>
+            <div class="author-info">
+              <h4>李明</h4>
+              <p>中国科学院遥感研究所</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-slide">
+        <div class="testimonial-content">
+          <div class="quote-icon"><i class="icon-quote-left"></i></div>
+          <p class="testimonial-text">作为城市规划工作者，这个系统帮助我们快速获取并分析城市扩张模式。统计分析工具直观且全面，非常适合制作专业报告。</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">王</div>
+            <div class="author-info">
+              <h4>王丽</h4>
+              <p>城市规划设计研究院</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-slide">
+        <div class="testimonial-content">
+          <div class="quote-icon"><i class="icon-quote-left"></i></div>
+          <p class="testimonial-text">我们在水资源监测项目中使用了这个系统，其水体变化检测模型非常精准。历史记录功能帮助我们轻松进行时间序列分析。</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">张</div>
+            <div class="author-info">
+              <h4>张伟</h4>
+              <p>水利水电科学研究院</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slider-controls">
+      <button class="slider-prev"><i class="icon-chevron-left"></i></button>
+      <div class="slider-dots">
+        <span class="dot active" data-slide="0"></span>
+        <span class="dot" data-slide="1"></span>
+        <span class="dot" data-slide="2"></span>
+      </div>
+      <button class="slider-next"><i class="icon-chevron-right"></i></button>
+    </div>
+  </section>
+
+  <!-- 行动号召 -->
+  <section class="section cta-section">
+    <div class="cta-content">
+      <h2>立即开始您的遥感图像识别之旅</h2>
+      <p>注册账号，体验先进的遥感图像处理和分析功能</p>
+      <div class="cta-buttons">
+        <a href="register.html" class="btn btn-primary btn-lg">免费注册</a>
+        <a href="#" class="btn btn-outline btn-lg">联系我们</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <img src="../static/img/logo.svg" alt="遥感图像目标检测系统">
+        <h3>遥感图像目标检测系统</h3>
+        <p>先进的遥感图像处理与分析平台</p>
+      </div>
+
+      <div class="footer-links">
+        <div class="footer-column">
+          <h4>导航</h4>
+          <ul>
+            <li><a href="#">首页</a></li>
+            <li><a href="#features">功能</a></li>
+            <li><a href="#workflow">工作流程</a></li>
+            <li><a href="#models">模型中心</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>资源</h4>
+          <ul>
+            <li><a href="#">文档中心</a></li>
+            <li><a href="#">API参考</a></li>
+            <li><a href="#">常见问题</a></li>
+            <li><a href="#">教程</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>联系我们</h4>
+          <ul>
+            <li><a href="#">技术支持</a></li>
+            <li><a href="#">合作咨询</a></li>
+            <li><a href="#">反馈建议</a></li>
+            <li><a href="#">加入我们</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 遥感图像目标检测系统. 保留所有权利.</p>
+      <div class="footer-social">
+        <a href="#" class="social-link"><i class="icon-weixin"></i></a>
+        <a href="#" class="social-link"><i class="icon-weibo"></i></a>
+        <a href="#" class="social-link"><i class="icon-github"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 导航菜单控制（移动端）
+      const mobileToggle = document.querySelector('.mobile-toggle');
+      const navbarMenu = document.querySelector('.navbar-menu');
+
+      if (mobileToggle) {
+        mobileToggle.addEventListener('click', function() {
+          this.classList.toggle('active');
+          navbarMenu.classList.toggle('active');
+        });
+      }
+
+      // 平滑滚动到锚点
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+
+          e.preventDefault();
+          const targetElement = document.querySelector(targetId);
+
+          if (targetElement) {
+            // 如果是移动端菜单，点击后关闭菜单
+            if (navbarMenu.classList.contains('active')) {
+              mobileToggle.classList.remove('active');
+              navbarMenu.classList.remove('active');
+            }
+
+            window.scrollTo({
+              top: targetElement.offsetTop - 80, // 减去导航栏高度
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+
+      // 导航栏滚动效果
+      const navbar = document.querySelector('.navbar');
+      let lastScrollPosition = 0;
+
+      function handleScroll() {
+        const currentScrollPosition = window.scrollY;
+
+        // 当滚动超过300px时改变导航栏样式
+        if (currentScrollPosition > 100) {
+          navbar.classList.remove('transparent');
+        } else {
+          navbar.classList.add('transparent');
+        }
+
+        lastScrollPosition = currentScrollPosition;
+      }
+
+      window.addEventListener('scroll', handleScroll);
+      handleScroll(); // 初始化
+
+      // 模型分类筛选
+      const categoryButtons = document.querySelectorAll('.category-btn');
+      const modelCards = document.querySelectorAll('.model-card');
+
+      categoryButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // 移除所有按钮的active类
+          categoryButtons.forEach(btn => btn.classList.remove('active'));
+          // 给当前按钮添加active类
+          this.classList.add('active');
+
+          const category = this.getAttribute('data-category');
+
+          modelCards.forEach(card => {
+            if (category === 'all' || card.getAttribute('data-category') === category) {
+              card.style.display = 'block';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // 用户评价轮播
+      const testimonialSlides = document.querySelectorAll('.testimonial-slide');
+      const dots = document.querySelectorAll('.slider-dots .dot');
+      const prevButton = document.querySelector('.slider-prev');
+      const nextButton = document.querySelector('.slider-next');
+      let currentSlide = 0;
+
+      function showSlide(index) {
+        // 隐藏所有幻灯片
+        testimonialSlides.forEach(slide => {
+          slide.classList.remove('active');
+        });
+
+        // 移除所有点的active类
+        dots.forEach(dot => {
+          dot.classList.remove('active');
+        });
+
+        // 显示当前幻灯片和点
+        testimonialSlides[index].classList.add('active');
+        dots[index].classList.add('active');
+
+        currentSlide = index;
+      }
+
+      // 点击圆点切换幻灯片
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          showSlide(index);
+        });
+      });
+
+      // 上一张和下一张按钮
+      if (prevButton) {
+        prevButton.addEventListener('click', () => {
+          let newIndex = currentSlide - 1;
+          if (newIndex < 0) {
+            newIndex = testimonialSlides.length - 1;
+          }
+          showSlide(newIndex);
+        });
+      }
+
+      if (nextButton) {
+        nextButton.addEventListener('click', () => {
+          let newIndex = currentSlide + 1;
+          if (newIndex >= testimonialSlides.length) {
+            newIndex = 0;
+          }
+          showSlide(newIndex);
+        });
+      }
+
+      // 自动轮播
+      let slideInterval = setInterval(() => {
+        let newIndex = currentSlide + 1;
+        if (newIndex >= testimonialSlides.length) {
+          newIndex = 0;
+        }
+        showSlide(newIndex);
+      }, 5000);
+
+      // 当鼠标悬停在轮播上时，暂停自动轮播
+      const sliderContainer = document.querySelector('.testimonials-slider');
+      if (sliderContainer) {
+        sliderContainer.addEventListener('mouseenter', () => {
+          clearInterval(slideInterval);
+        });
+
+        sliderContainer.addEventListener('mouseleave', () => {
+          slideInterval = setInterval(() => {
+            let newIndex = currentSlide + 1;
+            if (newIndex >= testimonialSlides.length) {
+              newIndex = 0;
+            }
+            showSlide(newIndex);
+          }, 5000);
+        });
+      }
+
+      // 添加动画效果
+      const animateElements = document.querySelectorAll('.feature-card, .workflow-step, .model-card');
+
+      function checkScroll() {
+        const triggerBottom = window.innerHeight * 0.8;
+
+        animateElements.forEach(element => {
+          const elementTop = element.getBoundingClientRect().top;
+
+          if (elementTop < triggerBottom) {
+            element.classList.add('animate');
+          }
+        });
+      }
+
+      window.addEventListener('scroll', checkScroll);
+      checkScroll(); // 初始化
+
+      // 工作流程动画
+      function checkWorkflowSteps() {
+        const workflowSteps = document.querySelectorAll('.workflow-step');
+        const triggerBottom = window.innerHeight * 0.8;
+
+        workflowSteps.forEach(step => {
+          const stepTop = step.getBoundingClientRect().top;
+          if (stepTop < triggerBottom) {
+            step.classList.add('animate');
+            step.style.opacity = '1';
+            step.style.transform = 'translateY(0)';
+          }
+        });
+      }
+
+      // 监听滚动事件激活工作流程动画
+      window.addEventListener('scroll', checkWorkflowSteps);
+      checkWorkflowSteps(); // 初始检查
+    });
+  </script>
+</body>
+</html>

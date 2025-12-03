@@ -15,5 +15,5 @@ CONFIG = {
     },
 
     # api接口
-    'DEEPSEEK_API_KEY': 'sk-683526b530ed48af855bae69f45212db'
+    'DEEPSEEK_API_KEY': 'sk-09a69c252c5a4b728c96345625a63e29'
 }

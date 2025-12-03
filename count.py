@@ -8,7 +8,7 @@ SKIP_PATHS = {
     '.git',  # 跳过Git目录
     '__pycache__',  # 跳过Python缓存目录
     'PaddleOCR-main',
-    'ultralytics-8.3.91',
+    'ultralytics-8.3.134',
     '.venv',
     'RCAN-master',
     "code"

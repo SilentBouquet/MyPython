@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - 遥感图像目标检测系统</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../static/css/main.css">
+  <link rel="stylesheet" href="../static/css/auth.css">
+  <style>
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-message {
+      color: #ff6b6b;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .error-input {
+      border-color: #ff6b6b !important;
+      background-color: rgba(255, 107, 107, 0.05) !important;
+    }
+  </style>
+</head>
+<body class="auth-page">
+  <div id="particles-js"></div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <img src="../static/img/logo.svg" alt="遥感图像目标检测系统" class="auth-logo">
+        <h1>遥感图像目标检测系统</h1>
+        <p>先进的遥感图像处理与识别平台</p>
+      </div>
+
+      <form id="login-form" class="auth-form">
+        <div class="input-group">
+          <label for="username">用户名</label>
+          <div class="input-wrapper">
+            <i class="icon-user"></i>
+            <input type="text" id="username" class="input-field" placeholder="输入用户名或邮箱" required>
+            <span class="input-status"></span>
+          </div>
+          <div class="error-message" id="username-error">请输入有效的用户名</div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">密码</label>
+          <div class="input-wrapper">
+            <i class="icon-lock"></i>
+            <input type="password" id="password" class="input-field" placeholder="输入密码" required>
+            <span class="toggle-password">显示</span>
+          </div>
+          <div class="error-message" id="password-error">请输入密码</div>
+        </div>
+
+        <div class="auth-options">
+          <label class="checkbox">
+            <input type="checkbox" id="remember">
+            <span class="checkmark"></span>
+            记住我
+          </label>
+          <a href="#" class="forgot-password">忘记密码?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="login-button">登录</button>
+
+        <div class="error-message" id="login-error"></div>
+      </form>
+
+      <div class="auth-footer">
+        <p>还没有账号? <a href="register.html">立即注册</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 粒子效果初始化
+      if(typeof particlesJS !== 'undefined') {
+        particlesJS('particles-js', {
+          particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: "#ffffff" },
+            opacity: { value: 0.1, random: true },
+            size: { value: 3, random: true },
+            line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.1, width: 1 },
+            move: { enable: true, speed: 1, direction: "none", random: true, straight: false, out_mode: "out", bounce: false }
+          },
+          interactivity: {
+            detect_on: "canvas",
+            events: {
+              onhover: { enable: true, mode: "repulse" },
+              onclick: { enable: true, mode: "push" },
+              resize: true
+            },
+            modes: {
+              repulse: { distance: 100, duration: 0.4 },
+              push: { particles_nb: 4 }
+            }
+          },
+          retina_detect: true
+        });
+      }
+
+      // 修复密码显示切换功能
+      const togglePassword = document.querySelector('.toggle-password');
+      const passwordInput = document.getElementById('password');
+
+      if(togglePassword) {
+        togglePassword.addEventListener('click', function() {
+          if (passwordInput.getAttribute('type') === 'password') {
+            passwordInput.setAttribute('type', 'text');
+            this.textContent = '隐藏';
+          } else {
+            passwordInput.setAttribute('type', 'password');
+            this.textContent = '显示';
+          }
+        });
+      }
+
+      // 表单验证函数
+      function validateForm() {
+        const username = document.getElementById('username');
+        const password = document.getElementById('password');
+        const usernameError = document.getElementById('username-error');
+        const passwordError = document.getElementById('password-error');
+        let isValid = true;
+
+        // 重置错误信息
+        usernameError.style.display = 'none';
+        passwordError.style.display = 'none';
+        username.classList.remove('error-input');
+        password.classList.remove('error-input');
+        document.getElementById('login-error').style.display = 'none';
+
+        // 验证用户名
+        if(!username.value.trim()) {
+          usernameError.textContent = '请输入用户名或邮箱';
+          usernameError.style.display = 'block';
+          username.classList.add('error-input');
+          isValid = false;
+        }
+
+        // 验证密码
+        if(!password.value) {
+          passwordError.textContent = '请输入密码';
+          passwordError.style.display = 'block';
+          password.classList.add('error-input');
+          isValid = false;
+        }
+
+        return isValid;
+      }
+
+      // 监听输入事件，移除错误状态
+      const inputFields = document.querySelectorAll('.input-field');
+      inputFields.forEach(field => {
+        field.addEventListener('input', function() {
+          this.classList.remove('error-input');
+          const fieldId = this.id;
+          const errorElement = document.getElementById(`${fieldId}-error`);
+          if (errorElement) {
+            errorElement.style.display = 'none';
+          }
+          // 同时隐藏通用错误消息
+          document.getElementById('login-error').style.display = 'none';
+        });
+      });
+
+      // 表单提交处理
+      const loginForm = document.getElementById('login-form');
+      const loginButton = document.getElementById('login-button');
+      const loginError = document.getElementById('login-error');
+
+      loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // 验证表单
+        if (!validateForm()) return;
+
+        // 获取表单数据
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const remember = document.getElementById('remember').checked;
+
+        // 显示登录中状态
+        loginButton.textContent = "处理中...";
+        loginButton.classList.add('btn-loading');
+        loginButton.disabled = true;
+        loginError.style.display = 'none';
+
+        // 发送登录请求
+        fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username,
+            password,
+            remember
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          // 恢复按钮状态
+          loginButton.textContent = "登录";
+          loginButton.classList.remove('btn-loading');
+          loginButton.disabled = false;
+
+          if(data.success) {
+            // 登录成功，保存token和用户信息
+            localStorage.setItem('auth_token', data.token);
+            localStorage.setItem('user_info', JSON.stringify(data.user));
+
+            // 添加登录成功动画
+            loginButton.textContent = "登录成功";
+            loginButton.style.backgroundColor = "#4CAF50";
+
+            // 显示成功消息
+            const successMessage = document.createElement('div');
+            successMessage.className = 'success-message';
+            successMessage.textContent = '登录成功，正在跳转...';
+            successMessage.style.color = '#4CAF50';
+            successMessage.style.textAlign = 'center';
+            successMessage.style.marginTop = '10px';
+            loginForm.appendChild(successMessage);
+
+            // 延迟跳转，给用户一个视觉反馈
+            setTimeout(() => {
+              window.location.href = 'dashboard.html';
+            }, 1000);
+          } else {
+            // 具体针对错误信息进行处理
+            const errorMsg = data.message || '';
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const usernameError = document.getElementById('username-error');
+            const passwordError = document.getElementById('password-error');
+
+            // 清除所有错误状态
+            usernameInput.classList.remove('error-input');
+            passwordInput.classList.remove('error-input');
+            usernameError.style.display = 'none';
+            passwordError.style.display = 'none';
+            loginError.style.display = 'none';
+
+            // 简化错误处理逻辑
+            if (errorMsg.includes('用户名或密码错误')) {
+              // 所有登录验证错误都在用户名输入框下显示
+              usernameInput.classList.add('error-input');
+              usernameError.textContent = '用户名或密码错误';
+              usernameError.style.display = 'block';
+            }
+            else {
+              // 其他错误情况，显示通用错误信息
+              loginError.textContent = errorMsg || '登录失败，请检查用户名和密码';
+              loginError.style.display = 'block';
+            }
+
+            // 添加抖动效果
+            loginForm.classList.add('shake');
+            setTimeout(() => {
+              loginForm.classList.remove('shake');
+            }, 500);
+          }
+        })
+        .catch(error => {
+          // 恢复按钮状态
+          loginButton.textContent = "登录";
+          loginButton.classList.remove('btn-loading');
+          loginButton.disabled = false;
+
+          // 显示错误信息
+          loginError.textContent = '网络错误，请稍后再试';
+          loginError.style.display = 'block';
+          console.error('登录请求失败:', error);
+        });
+      });
+
+      // 自动聚焦到用户名输入框
+      const usernameInput = document.getElementById('username');
+      if (usernameInput) {
+        usernameInput.focus();
+      }
+
+      // 添加回车键提交功能
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          const activeElement = document.activeElement;
+          if (activeElement.tagName === 'INPUT') {
+            loginButton.click();
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

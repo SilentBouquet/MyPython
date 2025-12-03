@@ -1,0 +1,195 @@
+{
+  "nodes": [
+    {
+      "name": "North America",
+      "category": "region"
+    },
+    {
+      "name": "Europe",
+      "category": "region"
+    },
+    {
+      "name": "Asia",
+      "category": "region"
+    },
+    {
+      "name": "Oceania",
+      "category": "region"
+    },
+    {
+      "name": "United States of America",
+      "category": "country"
+    },
+    {
+      "name": "European Union (Convention)",
+      "category": "country"
+    },
+    {
+      "name": "Russian Federation",
+      "category": "country"
+    },
+    {
+      "name": "Japan",
+      "category": "country"
+    },
+    {
+      "name": "Germany",
+      "category": "country"
+    },
+    {
+      "name": "Canada",
+      "category": "country"
+    },
+    {
+      "name": "Australia",
+      "category": "country"
+    },
+    {
+      "name": "Türkiye",
+      "category": "country"
+    },
+    {
+      "name": "United Kingdom of Great Britain and Northern Ireland",
+      "category": "country"
+    },
+    {
+      "name": "France",
+      "category": "country"
+    },
+    {
+      "name": "Italy",
+      "category": "country"
+    },
+    {
+      "name": "Poland",
+      "category": "country"
+    },
+    {
+      "name": "全球排放总量",
+      "category": "global"
+    }
+  ],
+  "links": [
+    {
+      "source": "North America",
+      "target": "United States of America",
+      "value": 5249805.2778999
+    },
+    {
+      "source": "Europe",
+      "target": "European Union (Convention)",
+      "value": 3059425.552087904
+    },
+    {
+      "source": "Asia",
+      "target": "Russian Federation",
+      "value": 1503549.9491915023
+    },
+    {
+      "source": "Asia",
+      "target": "Japan",
+      "value": 1093338.587056174
+    },
+    {
+      "source": "Europe",
+      "target": "Germany",
+      "value": 735119.5243688001
+    },
+    {
+      "source": "North America",
+      "target": "Canada",
+      "value": 645400.7077025549
+    },
+    {
+      "source": "Oceania",
+      "target": "Australia",
+      "value": 488003.5952362424
+    },
+    {
+      "source": "Asia",
+      "target": "Türkiye",
+      "value": 467043.205410968
+    },
+    {
+      "source": "Europe",
+      "target": "United Kingdom of Great Britain and Northern Ireland",
+      "value": 410224.0392072604
+    },
+    {
+      "source": "Europe",
+      "target": "France",
+      "value": 376060.51649349753
+    },
+    {
+      "source": "Europe",
+      "target": "Italy",
+      "value": 352425.15464011085
+    },
+    {
+      "source": "Europe",
+      "target": "Poland",
+      "value": 352354.58320844243
+    },
+    {
+      "source": "United States of America",
+      "target": "全球排放总量",
+      "value": 5249805.2778999
+    },
+    {
+      "source": "European Union (Convention)",
+      "target": "全球排放总量",
+      "value": 3059425.552087904
+    },
+    {
+      "source": "Russian Federation",
+      "target": "全球排放总量",
+      "value": 1503549.9491915023
+    },
+    {
+      "source": "Japan",
+      "target": "全球排放总量",
+      "value": 1093338.587056174
+    },
+    {
+      "source": "Germany",
+      "target": "全球排放总量",
+      "value": 735119.5243688001
+    },
+    {
+      "source": "Canada",
+      "target": "全球排放总量",
+      "value": 645400.7077025549
+    },
+    {
+      "source": "Australia",
+      "target": "全球排放总量",
+      "value": 488003.5952362424
+    },
+    {
+      "source": "Türkiye",
+      "target": "全球排放总量",
+      "value": 467043.205410968
+    },
+    {
+      "source": "United Kingdom of Great Britain and Northern Ireland",
+      "target": "全球排放总量",
+      "value": 410224.0392072604
+    },
+    {
+      "source": "France",
+      "target": "全球排放总量",
+      "value": 376060.51649349753
+    },
+    {
+      "source": "Italy",
+      "target": "全球排放总量",
+      "value": 352425.15464011085
+    },
+    {
+      "source": "Poland",
+      "target": "全球排放总量",
+      "value": 352354.58320844243
+    }
+  ],
+  "title": "2020年全球碳排放流向图"
+}

@@ -1,0 +1,110 @@
+{
+  "timestamp": "2025-06-11 18:55:56",
+  "test_directory": "test",
+  "model_path": "best_model.pth",
+  "overall_accuracy": 0.925531914893617,
+  "total_samples": 94,
+  "class_metrics": {
+    "baihe": {
+      "chinese_name": "百合",
+      "accuracy": 1.0,
+      "precision": 0.95,
+      "recall": 1.0,
+      "f1_score": 0.9743589743589743,
+      "avg_confidence": 0.973924037657286,
+      "support": 19,
+      "correct_predictions": 19
+    },
+    "dangshen": {
+      "chinese_name": "党参",
+      "accuracy": 0.9473684210526315,
+      "precision": 0.75,
+      "recall": 0.9473684210526315,
+      "f1_score": 0.8372093023255814,
+      "avg_confidence": 0.9440044823445772,
+      "support": 19,
+      "correct_predictions": 18
+    },
+    "gouqi": {
+      "chinese_name": "枸杞",
+      "accuracy": 0.7894736842105263,
+      "precision": 1.0,
+      "recall": 0.7894736842105263,
+      "f1_score": 0.8823529411764706,
+      "avg_confidence": 0.8098022749549464,
+      "support": 19,
+      "correct_predictions": 15
+    },
+    "huaihua": {
+      "chinese_name": "槐花",
+      "accuracy": 0.8888888888888888,
+      "precision": 1.0,
+      "recall": 0.8888888888888888,
+      "f1_score": 0.9411764705882353,
+      "avg_confidence": 0.8449627210696539,
+      "support": 18,
+      "correct_predictions": 16
+    },
+    "jinyinhua": {
+      "chinese_name": "金银花",
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "avg_confidence": 0.9614213030589255,
+      "support": 19,
+      "correct_predictions": 19
+    }
+  },
+  "confusion_matrix": [
+    [
+      19,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      18,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      4,
+      15,
+      0,
+      0
+    ],
+    [
+      0,
+      2,
+      0,
+      16,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      19
+    ]
+  ],
+  "class_names": [
+    "baihe",
+    "dangshen",
+    "gouqi",
+    "huaihua",
+    "jinyinhua"
+  ],
+  "class_mapping": {
+    "baihe": "百合",
+    "dangshen": "党参",
+    "gouqi": "枸杞",
+    "huaihua": "槐花",
+    "jinyinhua": "金银花"
+  }
+}
